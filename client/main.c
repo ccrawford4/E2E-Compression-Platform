@@ -15,7 +15,7 @@ int main(int argc, char**argv) {
     size_t size = snprintf(NULL, 0, "%s%s", PATH_PREFIX, file_name) + 1;
 
     char* full_path = malloc(size);
-    if (full_path = NULL) {
+    if (full_path == NULL) {
         perror("Failed to allocate memory");
         return EXIT_FAILURE;
     }
@@ -28,8 +28,5 @@ int main(int argc, char**argv) {
     free(full_path);
 
     establish_connection(server_address, server_port);
-
-    free(server_address);
-    free(server_port);
 
 }

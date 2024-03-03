@@ -5,7 +5,7 @@
 
 #define MAX_KEY_LEN 100
 
-char* read_file(char* file_path) {
+const char* read_file(char* file_path) {
     FILE* file = fopen(file_path, "rb");
     if (file == NULL) {
         perror("Unable to open file");
@@ -35,41 +35,29 @@ const char* get_value(char* file_path, char* key) {
     json_t *root;
     json_error_t error;
 
-    char* text = read_file(file_path);
+   const char* text = read_file(file_path);
 
     root = json_loads(text, 0, &error);
-    free(text);
+
 
     if (!root) {
         fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
         exit(EXIT_FAILURE);
     }
-
-    if (!json_is_array(root)) {
-        fprintf(stderr, "error: root is not an array\n");
-        json_decref(root);
-        exit(EXIT_FAILURE);
-    }
-
-    json_t *data, *value;
-    data = json_array_get(root, 0);
     
-    if (!json_is_object(data)) {
+    if (!json_is_object(root)) {
          fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
          exit(EXIT_FAILURE);
     }
 
+    json_t *data = json_object_get(root, key);
     
-    const char *ret_value;
-
-    value = json_object_get(data, key);
-
-    if (!json_is_string(value)) {
+    if (!json_is_string(data)) {
         fprintf(stderr, "error parsing key %s\n", key);
         exit(EXIT_FAILURE);
     }
 
-    ret_value = json_string_value(value);
+    const char* value = json_string_value(data);
 
-    return ret_value;
+    return value;
 }
