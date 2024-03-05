@@ -1,4 +1,3 @@
-#include "main.h"
 #include <jansson.h>
 #include <string.h>
 #include <errno.h>

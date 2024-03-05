@@ -18,7 +18,9 @@
 // Client establishes connection
 
 void establish_connection(char* server_ip, unsigned short server_port) {
-   int sockfd = socket(AF_INET, SOCK_DGRAM, SOCK_DGRAM);
+  printf("Server IP: %s\n", server_ip);
+  printf("Server Port: %d\n", server_port);
+  /* int sockfd = socket(AF_INET, SOCK_DGRAM, SOCK_DGRAM);
 
    struct sockaddr_in sin;
    struct hostent *host = gethostbyname(server_ip);
@@ -33,6 +35,6 @@ void establish_connection(char* server_ip, unsigned short server_port) {
    if (connect(sockfd, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
         perror("cannont connect to server");
         abort();
-   }
+   }*/
 
 }

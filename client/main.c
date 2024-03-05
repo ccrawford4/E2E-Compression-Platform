@@ -1,3 +1,4 @@
+#include "../shared/shared.h"
 #include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,10 +24,12 @@ int main(int argc, char**argv) {
     snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
 
     const char* server_address = get_value(full_path, "server_ip");
-    const char* server_port = get_value(full_path, "UDP_dest_port_number");
+    const char* port = get_value(full_path, "UDP_dest_port_number");
 
     free(full_path);
 
+    unsigned short server_port = (unsigned short)atoi(port);
+    
     establish_connection(server_address, server_port);
 
 }

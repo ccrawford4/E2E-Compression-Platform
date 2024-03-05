@@ -1,2 +1,1 @@
-void establish_connection(const char* server_address, const char* server_port);
-const char* get_value(char* file_path, char* key);
+void establish_connection(const char*server_ip, unsigned short server_port);
