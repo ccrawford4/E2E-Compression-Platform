@@ -1,4 +1,3 @@
-#include "../shared/shared.h"
 #include "main.h"
 
 int main(int argc, char**argv) {
@@ -7,6 +6,14 @@ int main(int argc, char**argv) {
         printf("./compdetect_server <TCP port number>\n");
         return EXIT_FAILURE;
     }
+
+    unsigned short server_port = (unsigned short) atoi(argv[1]);
+    if (!server_port) {
+        printf("ERROR! %s IS NOT A VALID PORT NUMBER\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
+    int sockfd = init_socket(server_port);
 
 
   /*  char* file_name = argv[1];
