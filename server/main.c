@@ -1,10 +1,5 @@
 #include "../shared/shared.h"
 #include "main.h"
-#include <stdio.h>
-#include <stdlib.h>
-// parse_json()
-
-#define PATH_PREFIX "./"
 
 int main(int argc, char**argv) {
     if (argc != 2) {
