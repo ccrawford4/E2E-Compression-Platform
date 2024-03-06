@@ -14,7 +14,6 @@ void handle_error(int sockfd, char* error_msg) {
     abort();
 }
 
-
 int send_packets(int sockfd, char *buffer, int buffer_len) {
     size_t sent_bytes = send(sockfd, buffer, buffer_len, 0);
     
@@ -72,13 +71,45 @@ void server_listen(int sockfd) {
     }
 }
 
-int init_socket(unsigned short server_port) {
-    int sockfd = 1;
-    if (sockfd = socket(AF_INET, SOCK_DGRAM, 0) < 0) {
-        handle_error(sockfd, "socket() could not create UDP socket");
+struct addrinfo init_hints() {
+    struct addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = IPPROTO_TCP;
+    return hints;
+}
+
+int init_socket(const char* server_port) {
+    struct addrinfo hints = init_hints();
+
+    struct addrinfo *results;
+
+    int e = getaddrinfo(NULL, server_port, &hints, &results);
+    if (e != 0) {
+        printf("getaddrinfo: %s\n", gai_strerror(e));
+        exit(EXIT_FAILURE);
+    }
+    
+    int sockfd = -1;
+    for (struct addrinfo *r = results; r != NULL; r = r->ai_next) {
+        sockfd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
+        if (sockfd == -1) {
+            continue;
+        }
+        int reuse_addr = 1;
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr)) == -1) 
+        {
+            handle_error(sockfd, "setsockopt()");
+        }
+        if (bind(sockfd, r->ai_addr, r->ai_addrlen) == -1) {
+            close(sockfd);
+            continue;
+        }
+        break;
     }
 
-    bind_socket(sockfd, server_port);
     return sockfd;
 }
 
