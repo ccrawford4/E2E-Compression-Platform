@@ -14,11 +14,11 @@ void handle_error(int sockfd, char* error_msg) {
     abort();
 }
 
-int send_packets(int sockfd, char *buffer, int buffer_len) {
-    size_t sent_bytes = send(sockfd, buffer, buffer_len, 0);
+int send_packets(int client_socket, char *buffer, int buffer_len) {
+    size_t sent_bytes = send(client_socket, buffer, buffer_len, 0);
     
     if (sent_bytes < 0) {
-        handle_error(sockfd, "sendto() failed");
+        handle_error(client_socket, "sendto() failed");
     }
     return sent_bytes;
 }
@@ -57,7 +57,7 @@ void bind_socket(int sockfd, unsigned short server_port) {
 
 }
 
-void server_listen(int sockfd) {
+int server_listen(int sockfd) {
     if (listen(sockfd, 5) < 0) {
        handle_error(sockfd, "listen() error listening");
     }
@@ -69,6 +69,7 @@ void server_listen(int sockfd) {
         close(client_sockfd);
         handle_error(sockfd, "accept() error accepting connections");
     }
+    return client_sockfd;
 }
 
 struct addrinfo init_hints() {
@@ -115,7 +116,9 @@ int init_socket(const char* server_port) {
 
 void clean_exit() {exit(0);};
 
-void close_sockets() {
+void close_sockets(int sockfd, int client_socket) {
+    close(sockfd);
+    close(client_socket);
     signal(SIGTERM, clean_exit);
     signal(SIGINT, clean_exit);
 }
