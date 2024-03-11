@@ -4,7 +4,7 @@
 
 #define MAX_KEY_LEN 100
 
-const char* read_file(char* file_path) {
+char* read_file(char* file_path) {
     FILE* file = fopen(file_path, "rb");
     if (file == NULL) {
         perror("Unable to open file");
