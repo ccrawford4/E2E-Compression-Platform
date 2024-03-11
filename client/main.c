@@ -1,5 +1,26 @@
 #include "main.h"
+#define MAX_BUFFER_LEN 500
 // parse_json()
+
+void send_file_contents(int sockfd, char* file_path) {
+    char* file_contents = read_file(file_path);
+    int len = strlen(file_contents);
+    while (!send_bytes(sockfd, file_contents, len, 0)) {
+        printf("Sending....\n");
+    }
+
+}
+
+void receive_server_msg(int sockfd) {
+    char *buffer = (char*)malloc(MAX_BUFFER_LEN);
+    memset(buffer, 0, sizeof(buffer));
+    int len = strlen(buffer);
+    while (receive_bytes(sockfd, buffer, len, 0) != 0) {
+        printf("Recieving....\n");
+    }
+    printf("Server Message: %s\n", buffer);
+    free(buffer);
+}
 
 int main(int argc, char**argv) {
     if (argc != 2) {
@@ -21,10 +42,16 @@ int main(int argc, char**argv) {
     const char* server_address = get_value(full_path, "server_ip");
     const char* port = get_value(full_path, "UDP_dest_port_number");
 
-    free(full_path);
-
     unsigned short server_port = (unsigned short)atoi(port);
     
-    establish_connection(server_address, server_port);
+    int sockfd = establish_connection(server_address, server_port);
+
+    send_file_contents(sockfd, full_path);
+
+    free(full_path);
+
+    receive_server_msg(sockfd);
+
+    close(sockfd);
 
 }
