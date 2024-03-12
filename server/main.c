@@ -24,7 +24,7 @@ int main(int argc, char**argv) {
 
     int client_socket = server_listen(sockfd);
 
-    print_out_contents(sockfd);
+    print_out_contents(client_socket);
 
     close_sockets(sockfd, client_socket);
 

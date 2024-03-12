@@ -40,9 +40,8 @@ int receive_packets(int sockfd, char *buffer, int buffer_len) {
 void bind_socket(int sockfd, unsigned short server_port) {
     int optval = 1;
     if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
-        handle_error(sockfd, "setsockopt() couldn't reuse address");
+        handle_error(sockfd, "setsockopt()");
     }
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
@@ -72,45 +71,16 @@ int server_listen(int sockfd) {
     return client_sockfd;
 }
 
-struct addrinfo init_hints() {
-    struct addrinfo hints;
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_protocol = IPPROTO_TCP;
-    return hints;
-}
-
 int init_socket(const char* server_port) {
-    struct addrinfo hints = init_hints();
-
-    struct addrinfo *results;
-
-    int e = getaddrinfo(NULL, server_port, &hints, &results);
-    if (e != 0) {
-        printf("getaddrinfo: %s\n", gai_strerror(e));
-        exit(EXIT_FAILURE);
+    // Create the socket
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd == -1) {
+        handle_error(sockfd, "socket()");
     }
+    unsigned int port_number = (unsigned int)atoi(server_port);
+    // Bind and set the socket options
+    bind_socket(sockfd, port_number);
     
-    int sockfd = -1;
-    for (struct addrinfo *r = results; r != NULL; r = r->ai_next) {
-        sockfd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
-        if (sockfd == -1) {
-            continue;
-        }
-        int reuse_addr = 1;
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse_addr, sizeof(reuse_addr)) == -1) 
-        {
-            handle_error(sockfd, "setsockopt()");
-        }
-        if (bind(sockfd, r->ai_addr, r->ai_addrlen) == -1) {
-            close(sockfd);
-            continue;
-        }
-        break;
-    }
-
     return sockfd;
 }
 
