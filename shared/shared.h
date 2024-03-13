@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <jansson.h>
+#include <string.h>
+#include <errno.h>
 
 #define PATH_PREFIX "../shared/" 
 const char* get_value(char* file_path, char* key);

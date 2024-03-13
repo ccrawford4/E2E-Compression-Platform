@@ -1,6 +1,4 @@
-#include <jansson.h>
-#include <string.h>
-#include <errno.h>
+#include "shared.h"
 
 #define MAX_KEY_LEN 100
 
