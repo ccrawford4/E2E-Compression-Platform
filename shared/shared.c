@@ -4,6 +4,13 @@
 
 #define MAX_KEY_LEN 100
 
+
+void handle_error(int sockfd, char* error_msg) {
+    perror(error_msg);
+    close(sockfd);
+    abort();
+}
+
 char* read_file(char* file_path) {
     FILE* file = fopen(file_path, "rb");
     if (file == NULL) {

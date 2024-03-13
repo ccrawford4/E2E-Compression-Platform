@@ -8,12 +8,6 @@
 // write()
 
 
-void handle_error(int sockfd, char* error_msg) {
-    perror(error_msg);
-    close(sockfd);
-    abort();
-}
-
 int send_packets(int client_socket, char *buffer, int buffer_len) {
     size_t sent_bytes = send(client_socket, buffer, buffer_len, 0);
     

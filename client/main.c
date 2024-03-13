@@ -5,10 +5,12 @@
 void send_file_contents(int sockfd, char* file_path) {
     char* file_contents = read_file(file_path);
     int len = strlen(file_contents);
-    while (!send_bytes(sockfd, file_contents, len, 0)) {
-        printf("Sending....\n");
+    if (send_bytes(sockfd, file_contents, len, 0)) {
+        printf("Sending complete.\n");
+    } else {
+        handle_error(sockfd, "Send()");
     }
-
+    free(file_contents);
 }
 
 void receive_server_msg(int sockfd) {
