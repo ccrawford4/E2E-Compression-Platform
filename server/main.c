@@ -1,14 +1,21 @@
 #include "main.h"
 
-#define MAX_BUFFER 1000
+#define MAX_BUFFER_LEN 1000
 
 void print_out_contents(int sockfd) {
-    char* buffer = (char*)malloc(MAX_BUFFER);
-    int buffer_len = sizeof(buffer);
+    char* buffer = (char*)malloc(MAX_BUFFER_LEN);
 
-    while (receive_packets(sockfd, buffer, buffer_len) != EOF) {
+    int bytes_received;
+    while ((bytes_received = receive_packets(sockfd, buffer, MAX_BUFFER_LEN)) > 0) {
         printf("%s\n", buffer);
+        memset(buffer, 0, MAX_BUFFER_LEN);
     }
+    free(buffer);
+    if (bytes_received < 0) {
+        handle_error(sockfd, "bytes_recieved");
+    }
+    char* server_msg = "File Received!";
+    send_packets(sockfd, server_msg, strlen(server_msg) + 1);
 }
 
 int main(int argc, char**argv) {
