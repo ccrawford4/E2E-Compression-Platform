@@ -5,12 +5,10 @@
 void print_out_contents(int sockfd) {
     char* buffer = (char*)malloc(MAX_BUFFER_LEN);
 
-    int bytes_received;
-    while ((bytes_received = receive_packets(sockfd, buffer, MAX_BUFFER_LEN)) > 0) {
-        printf("%s\n", buffer);
-        memset(buffer, 0, MAX_BUFFER_LEN);
-    }
+    int bytes_received = receive_packets(sockfd, buffer, MAX_BUFFER_LEN);
+    printf("%s\n", buffer);    
     free(buffer);
+
     if (bytes_received < 0) {
         handle_error(sockfd, "bytes_recieved");
     }
