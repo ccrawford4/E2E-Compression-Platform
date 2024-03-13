@@ -17,8 +17,9 @@ void receive_server_msg(int sockfd) {
     char *buffer = (char*)malloc(MAX_BUFFER_LEN);
     memset(buffer, 0, sizeof(buffer));
     int len = strlen(buffer);
-    while (receive_bytes(sockfd, buffer, len, 0) != 0) {
-        printf("Recieving....\n");
+    int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
+    if (bytes_recv == -1) {
+        handle_error(sockfd, "Recv()");
     }
     printf("Server Message: %s\n", buffer);
     free(buffer);
