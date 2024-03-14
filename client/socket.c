@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 // Create a socket
 // Determine server address & port number (from config file)
@@ -77,6 +78,8 @@ int send_bytes(int sockfd, char *buf, int len, int flags) {
 }
 
 // TODO: Implementation of this
-void send_low_entropy();
+void send_udp_packets(int sockfd, bool low_entropy) {
+    
+}
 
 

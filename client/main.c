@@ -1,4 +1,5 @@
 #include "main.h"
+
 #define MAX_BUFFER_LEN 500
 // parse_json()
 
@@ -55,7 +56,7 @@ int main(int argc, char**argv) {
 
     int udp_socket = init_udp_socket(server_port);
     // TODO: Implement this
-  //  send_low_entropy(udp_socket);
+    send_udp_packets(udp_socket, true);
  
 
     close(tcp_socket);
