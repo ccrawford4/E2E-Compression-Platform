@@ -47,8 +47,12 @@ int main(int argc, char**argv) {
     const char* server_port = argv[1];
     int sockfd = init_socket(server_port);
     int client_socket = server_listen(sockfd);
+    
+    // Establish TCP Connection
+    print_out_contents(client_socket); // For testing and sending confirmation   
 
-    print_out_contents(client_socket); // For testing and sending confirmation    
+    int udp_socket = init_udp_socket(server_port);
+
     close_sockets(sockfd, client_socket);
 
     return 0;

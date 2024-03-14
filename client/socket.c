@@ -17,6 +17,25 @@
 
 // Client establishes connection
 
+
+int init_udp_socket(unsigned short server_port) {
+    struct sockaddr_in server_addr;
+    int sockfd;
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("Could not create UDP socket");
+        abort();
+    }
+    memset(&server_addr, 0, sizeof(server_addr));
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+
+    return sockfd;
+}
+
+
 int establish_connection(char* server_ip, unsigned short server_port) {
   printf("Server IP: %s\n", server_ip);
   printf("Server Port: %d\n", server_port);
@@ -56,5 +75,8 @@ int send_bytes(int sockfd, char *buf, int len, int flags) {
     }
     return bytes_sent;
 }
+
+// TODO: Implementation of this
+void send_low_entropy();
 
 

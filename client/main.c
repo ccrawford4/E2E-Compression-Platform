@@ -47,14 +47,17 @@ int main(int argc, char**argv) {
 
     unsigned short server_port = (unsigned short)atoi(port);
     
-    int sockfd = establish_connection(server_address, server_port);
-
-    send_file_contents(sockfd, full_path);
-
+    // Inital TCP Connection
+    int tcp_socket = establish_connection(server_address, server_port);
+    send_file_contents(tcp_socket, full_path);
     free(full_path);
+    receive_server_msg(tcp_socket);
 
-    receive_server_msg(sockfd);
+    int udp_socket = init_udp_socket(server_port);
+    // TODO: Implement this
+  //  send_low_entropy(udp_socket);
+ 
 
-    close(sockfd);
+    close(tcp_socket);
 
 }
