@@ -7,19 +7,8 @@
 #include <stdbool.h>
 #include <arpa/inet.h>
 
-// Create a socket
-// Determine server address & port number (from config file)
-// Connect to server
-// Write/Read data to connected socket
 
-// socket()
-// connect()
-// write()
-// read()
-
-// Client establishes connection
-
-
+// Creates and returns a valid UDP socket
 int init_udp_socket(unsigned short server_port) {
     struct sockaddr_in server_addr;
     int sockfd;
@@ -34,10 +23,15 @@ int init_udp_socket(unsigned short server_port) {
     server_addr.sin_port = htons(server_port);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("connect()");
+        abort();
+    }
+
     return sockfd;
 }
 
-
+// Establishes a TCP connection given the server's IP address and port number
 int establish_connection(char* server_ip, unsigned short server_port) {
   printf("Server IP: %s\n", server_ip);
   printf("Server Port: %d\n", server_port);
@@ -60,6 +54,7 @@ int establish_connection(char* server_ip, unsigned short server_port) {
    return sockfd;
 }
 
+// Receives bytes from the server (TCP)
 int receive_bytes(int sockfd, char *buf, int len, int flags) {
     ssize_t bytes_recieved = recv(sockfd, buf, len, flags);
     if (bytes_recieved == -1) {
@@ -69,6 +64,7 @@ int receive_bytes(int sockfd, char *buf, int len, int flags) {
     return bytes_recieved;
  }
 
+// Sends bytes to the server (TCP)
 int send_bytes(int sockfd, char *buf, int len, int flags) {
     ssize_t bytes_sent = send(sockfd, buf, len, flags);
     if (bytes_sent == -1) {
@@ -78,14 +74,14 @@ int send_bytes(int sockfd, char *buf, int len, int flags) {
     return bytes_sent;
 }
 
-// TODO: Implementation of this
+// Sends UDP packets
 void send_udp_packets(int sockfd, const char* server_ip, int server_port, int packet_size, int num_packets, bool low_entropy) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(server_port);
     
-    // Convert the IP address from text to binary form
+    // Converts the IP address from text to binary form
     if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
         perror("inet_pton()\n");
         abort();
@@ -100,11 +96,15 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
 
     for (int i = 0; i < num_packets; i++) {
         ssize_t bytes_sent;
+        // low entropy data is composed of zeros
         if (low_entropy) {
             bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
             if (bytes_sent != packet_size) {
                 perror("sendto()");
             }
+        }
+        else {
+            //TODO: Construct high entropy data
         }
     }
 

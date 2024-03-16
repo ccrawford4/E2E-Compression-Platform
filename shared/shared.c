@@ -39,10 +39,8 @@ const char* get_value(char* file_path, char* key) {
     json_t *root;
     json_error_t error;
 
-   const char* text = read_file(file_path);
-
+    const char* text = read_file(file_path);
     root = json_loads(text, 0, &error);
-
 
     if (!root) {
         fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
@@ -55,6 +53,8 @@ const char* get_value(char* file_path, char* key) {
     }
 
     json_t *data = json_object_get(root, key);
+
+    // TODO: if key is invalid -> return a valid key from hashmap object (to be created)
     
     if (!json_is_string(data)) {
         fprintf(stderr, "error parsing key %s\n", key);
