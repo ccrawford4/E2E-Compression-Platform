@@ -92,7 +92,7 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
     }
 
     char *packet = (char*)malloc(packet_size);
-    memset(packet, 0, sizeof(char * packet_size));
+    memset(packet, 0, sizeof(packet));
     if (packet == NULL) {
         perror("Memory allocation failed\n");
         abort();

@@ -22,7 +22,7 @@ void receive_server_msg(int sockfd) {
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
     }
-    printf("Server Message: %s\n", buffer);
+   printf("Server Message: %s\n", buffer);
     free(buffer);
 }
 
@@ -55,9 +55,8 @@ int main(int argc, char**argv) {
     receive_server_msg(tcp_socket);
 
     int udp_socket = init_udp_socket(server_port);
-    int packet_size = 
-    // TODO: Implement this
-    send_udp_packets(udp_socket, server_address, (int)server_port, );
+    // TODO: change so we don't use hardcoded values
+    send_udp_packets(udp_socket, server_address, (int)server_port, 3000, 6000, true);
  
 
     close(tcp_socket);
