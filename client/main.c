@@ -93,8 +93,8 @@ int main(int argc, char**argv) {
     const char* server_addr = get_value(full_path, "server_ip");
 
     tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
-    probing_phase(full_path, server_addr);                                // Probing Phase
-    tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
+  //  probing_phase(full_path, server_addr);                                // Probing Phase
+ //   tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
    
     free(full_path);
  

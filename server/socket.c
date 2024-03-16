@@ -7,7 +7,6 @@
 // read()
 // write()
 
-
 int send_packets(int client_socket, char *buffer, int buffer_len) {
     size_t sent_bytes = send(client_socket, buffer, buffer_len, 0);
     
@@ -94,7 +93,7 @@ ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t add
     char* buffer = (char*)malloc(1000);
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
     size_t len = strlen(buffer);
-    ssize_t bytes = recvfrom(sockfd, buffer, len, 0, src_addr, (socklen_t)addrlen);
+    ssize_t bytes = recvfrom(sockfd, buffer, len, 0, src_addr, &addrlen);
     return bytes;
 }
 

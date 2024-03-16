@@ -72,14 +72,14 @@ int main(int argc, char**argv) {
     
     // Establish TCP Connection
     print_out_contents(client_socket); // For testing and sending confirmation   
-
+/*
     int udp_socket = init_udp_socket(server_port);
 
     char* buffer = (char*)malloc(10000);
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
     
 
-    recv_udp_packets(udp_socket, server_port);
+    recv_udp_packets(udp_socket, server_port);*/
     
     close_sockets(sockfd, client_socket);
 
