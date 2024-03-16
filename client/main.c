@@ -55,8 +55,9 @@ int main(int argc, char**argv) {
     receive_server_msg(tcp_socket);
 
     int udp_socket = init_udp_socket(server_port);
+    int packet_size = 
     // TODO: Implement this
-    send_udp_packets(udp_socket, true);
+    send_udp_packets(udp_socket, server_address, (int)server_port, );
  
 
     close(tcp_socket);

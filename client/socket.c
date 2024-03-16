@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
 
 // Create a socket
 // Determine server address & port number (from config file)
@@ -78,8 +79,36 @@ int send_bytes(int sockfd, char *buf, int len, int flags) {
 }
 
 // TODO: Implementation of this
-void send_udp_packets(int sockfd, bool low_entropy) {
+void send_udp_packets(int sockfd, const char* server_ip, int server_port, int packet_size, int num_packets, bool low_entropy) {
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(server_port);
     
+    // Convert the IP address from text to binary form
+    if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
+        perror("inet_pton()\n");
+        abort();
+    }
+
+    char *packet = (char*)malloc(packet_size);
+    memset(packet, 0, sizeof(char * packet_size));
+    if (packet == NULL) {
+        perror("Memory allocation failed\n");
+        abort();
+    }
+
+    for (int i = 0; i < num_packets; i++) {
+        ssize_t bytes_sent;
+        if (low_entropy) {
+            bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+            if (bytes_sent != packet_size) {
+                perror("sendto()");
+            }
+        }
+    }
+
+    free(packet);
 }
 
 
