@@ -8,3 +8,4 @@ int receive_packets(int sockfd, char *buffer, int buffer_len);
 int server_listen(int sockfd);
 void clean_exit();
 void close_sockets();
+ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t addrlen);

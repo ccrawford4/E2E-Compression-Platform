@@ -36,6 +36,27 @@ void print_out_contents(int sockfd) {
     send_packets(sockfd, server_msg, strlen(server_msg) + 1);
 }
 
+void recv_udp_packets(int sockfd, unsigned int server_port) {
+    char* buffer = (char*)malloc(10000);
+    memset(buffer, 0, sizeof(buffer) / sizeof(char));
+
+    struct sockaddr_in src_addr;
+    memset(&src_addr, 0, sizeof(src_addr));
+
+    src_addr.sin_family = AF_INET;
+    src_addr.sin_addr.s_addr = INADDR_ANY;
+    // TODO: possibly change based on what port it should be
+    src_addr.sin_port = htons(server_port);    
+
+    ssize_t bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
+
+   // TODO: remove hard-coded values
+   while (bytes < 6000) {
+        bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
+   }
+
+   printf("Received all UDP packets!\n");
+}
 
 int main(int argc, char**argv) {
     if (argc != 2) {
@@ -44,6 +65,7 @@ int main(int argc, char**argv) {
         return EXIT_FAILURE;
     }
 
+    // TODO: Change this to use pre-probing socket vs post-probing socket
     const char* server_port = argv[1];
     int sockfd = init_socket(server_port);
     int client_socket = server_listen(sockfd);
@@ -53,6 +75,12 @@ int main(int argc, char**argv) {
 
     int udp_socket = init_udp_socket(server_port);
 
+    char* buffer = (char*)malloc(10000);
+    memset(buffer, 0, sizeof(buffer) / sizeof(char));
+    
+
+    recv_udp_packets(udp_socket, server_port);
+    
     close_sockets(sockfd, client_socket);
 
     return 0;

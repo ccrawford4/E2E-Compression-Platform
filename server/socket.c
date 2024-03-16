@@ -90,6 +90,15 @@ int init_udp_socket(const char* server_port) {
     return sockfd;
 }
 
+ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t addrlen) {
+    char* buffer = (char*)malloc(1000);
+    memset(buffer, 0, sizeof(buffer) / sizeof(char));
+    size_t len = strlen(buffer);
+    ssize_t bytes = recvfrom(sockfd, buffer, len, 0, src_addr, (socklen_t)addrlen);
+    return bytes;
+}
+
+
 void clean_exit() {exit(0);};
 
 void close_sockets(int sockfd, int client_socket) {
