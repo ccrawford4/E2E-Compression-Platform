@@ -65,10 +65,13 @@ int main(int argc, char**argv) {
         return EXIT_FAILURE;
     }
 
-    // TODO: Change this to use pre-probing socket vs post-probing socket
-    const char* server_port = argv[1];
-    int sockfd = init_socket(server_port);
-    int client_socket = server_listen(sockfd);
+    unsigned int server_port = (unsigned int) atoi(argv[1]);
+    if (server_port == 0) {
+        printf("ERROR! %s Is Not A Valid Port Number\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+    int tcp_socket = init_socket(server_port, SOCK_STREAM);
+    int client_socket = server_listen(tcp_socket);
     
     // Establish TCP Connection
     print_out_contents(client_socket); // For testing and sending confirmation   
@@ -81,7 +84,7 @@ int main(int argc, char**argv) {
 
     recv_udp_packets(udp_socket, server_port);*/
     
-    close_sockets(sockfd, client_socket);
+    close_sockets(tcp_socket, client_socket);
 
     return 0;
 
