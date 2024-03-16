@@ -74,10 +74,24 @@ int init_socket(unsigned int port_number, int type) {
 // Receives UDP packets
 ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t addrlen) {
     char* buffer = (char*)malloc(1000);
+    if (buffer == NULL) {
+        handle_error(sockfd, "Memory Allocation");
+        return EXIT_FAILURE;
+    }
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
     size_t len = strlen(buffer);
     ssize_t bytes = recvfrom(sockfd, buffer, len, 0, src_addr, &addrlen);
     return bytes;
+}
+
+ssize_t send_udp_packets(int sockfd, struct sockaddr *dest_addr) {
+    const char* buf = "All UDP Packets Received!";
+    size_t len = strlen(buf);
+    ssize_t bytes_sent = sendto(sockfd, buf, len, 0, dest_addr, sizeof(struct sockaddr));
+    if (bytes_sent != len) {
+        handle_error(sockfd, "sendto()");
+    }
+    return sockfd;
 }
 
 // Exit functions
