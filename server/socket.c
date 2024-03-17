@@ -80,7 +80,11 @@ ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t add
     }
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
     size_t len = strlen(buffer);
-    ssize_t bytes = recvfrom(sockfd, buffer, len, 0, src_addr, &addrlen);
+    ssize_t bytes;
+    if ((bytes = recvfrom(sockfd, buffer, len, 0, src_addr, &addrlen)) < 0) {
+        handle_error(sockfd, "recvfrom()");
+        return EXIT_FAILURE;
+    }
     return bytes;
 }
 

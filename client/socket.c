@@ -23,10 +23,10 @@ int init_udp_socket(unsigned short server_port) {
     server_addr.sin_port = htons(server_port);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+   /* if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         perror("connect()");
         abort();
-    }
+    }*/
 
     return sockfd;
 }

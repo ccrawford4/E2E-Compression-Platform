@@ -41,13 +41,13 @@ void tcp_connection(char* full_path, char* key, const char* server_address) {
 
 // Probing Phase
 void probing_phase(char* full_path, const char* server_address) {
-    int udp_src_port = atoi(get_value(full_path, "UDP_src_port_number"));
-    if (udp_src_port == 0) {
+    int udp_dest_port = atoi(get_value(full_path, "UDP_dest_port_number"));
+    if (udp_dest_port == 0) {
         perror("ERROR! Invalid UDP_src_port_number");
         exit(EXIT_FAILURE);
     }
 
-    int udp_socket = init_udp_socket(udp_src_port);
+    int udp_socket = init_udp_socket(udp_dest_port);
     char* udp_payload_string = (char*)get_value(full_path, "UDP_payload_size");
     int len = strlen(udp_payload_string);
     *(udp_payload_string + len - 1) = '\0';         // Remove the 'B' from the payload_size
@@ -64,13 +64,8 @@ void probing_phase(char* full_path, const char* server_address) {
         exit(EXIT_FAILURE);
     }
 
-    int udp_dest_port_number = atoi(get_value(full_path, "UDP_dest_port_number"));
-    if (udp_dest_port_number == 0) {
-        printf("ERROR! Invalid UDP_dest_port_number\n");
-        exit(EXIT_FAILURE);
-    }
     // Send low entropy
-    send_udp_packets(udp_socket, server_address, udp_dest_port_number, udp_payload_size, udp_packet_train_size, true);
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
     // Wait T seconds
     
     // Send high entropy packets
