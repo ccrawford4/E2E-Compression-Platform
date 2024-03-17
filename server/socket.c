@@ -85,6 +85,7 @@ ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t add
         handle_error(sockfd, "recvfrom()");
         return EXIT_FAILURE;
     }
+    free(buffer);
     return bytes;
 }
 
