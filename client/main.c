@@ -65,6 +65,10 @@ void probing_phase(char* full_path, const char* server_address) {
     }
 
     int udp_dest_port_number = atoi(get_value(full_path, "UDP_dest_port_number"));
+    if (udp_dest_port_number == 0) {
+        printf("ERROR! Invalid UDP_dest_port_number\n");
+        exit(EXIT_FAILURE);
+    }
     // Send low entropy
     send_udp_packets(udp_socket, server_address, udp_dest_port_number, udp_payload_size, udp_packet_train_size, true);
     // Wait T seconds
@@ -88,11 +92,11 @@ int main(int argc, char**argv) {
         perror("Failed to allocate memory");
         return EXIT_FAILURE;
     }
-    snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
+     snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
 
-    const char* server_addr = get_value(full_path, "server_ip");
+     const char* server_addr = get_value(full_path, "server_ip");
 
-    tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
+     tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
      probing_phase(full_path, server_addr);                                // Probing Phase
  //   tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
    
