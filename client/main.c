@@ -39,6 +39,50 @@ void tcp_connection(char* full_path, char* key, const char* server_address) {
     receive_server_msg(tcp_socket);
 }
 
+
+// Given a time (in seconds) it pauses the program
+void wait(unsigned int count_down_time_in_secs) {
+    unsigned int x_hours = 0;
+    unsigned int x_minutes = 0;
+    unsigned int x_seconds = 0;
+    unsigned int x_milliseconds = 0;
+    unsigned int total_time = 0, time_left = 0;
+
+    clock_t start_time, x_count_time;
+   
+   start_time = clock();
+   time_left = count_down_time_in_secs - x_seconds; // Update timer
+
+   while (time_left > 0) {
+       x_count_time = clock();
+       x_milliseconds = x_count_time - start_time;
+       x_seconds = (x_milliseconds / (CLOCKS_PER_SEC) - (x_minutes * 60));
+       x_minutes = (x_milliseconds / (CLOCKS_PER_SEC)) / 60;
+       x_hours = x_minutes / 60;
+
+       time_left = count_down_time_in_secs - x_seconds;
+
+       printf("%d seconds left\n", time_left);
+   }
+}
+
+
+void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) { 
+    // Send low entropy
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+
+    unsigned int timer = (unsigned int)atoi(get_value(full_path, "measurement_time"));
+    if (timer == 0) {
+        perror("ERROR! Invalid measurement_time");
+        exit(EXIT_FAILURE);
+    }
+    wait(timer);
+    
+    // Send high entropy packets
+//    send_udp_packets(udp_socket, server_address, udp_dest_port_number, udp_payload_size, udp_packet_train_size, false);
+
+}
+
 // Probing Phase
 void probing_phase(char* full_path, const char* server_address) {
     int udp_dest_port = atoi(get_value(full_path, "UDP_dest_port_number"));
@@ -64,12 +108,8 @@ void probing_phase(char* full_path, const char* server_address) {
         exit(EXIT_FAILURE);
     }
 
-    // Send low entropy
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
-    // Wait T seconds
-    
-    // Send high entropy packets
-//    send_udp_packets(udp_socket, server_address, udp_dest_port_number, udp_payload_size, udp_packet_train_size, false);
+    probe(full_path, udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size);
+
 }
 
 int main(int argc, char**argv) {

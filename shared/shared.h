@@ -10,6 +10,7 @@
 #include <jansson.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #define PATH_PREFIX "../shared/" 
 const char* get_value(char* file_path, char* key);
