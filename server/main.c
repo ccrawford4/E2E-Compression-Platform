@@ -58,11 +58,6 @@ void recv_udp_packets(int sockfd, unsigned int port_number) {
 
 // Establishes a TCP Connection
 void establish_tcp_connection(unsigned int server_port) {
-    unsigned int server_port = (unsigned int) atoi(argv[1]);
-    if (server_port == 0) {
-        printf("ERROR! %s Is Not A Valid Port Number\n", argv[1]);
-        return EXIT_FAILURE;
-    }
     int tcp_socket = init_socket(server_port, SOCK_STREAM);
     int client_socket = server_listen(tcp_socket);
     
@@ -75,7 +70,7 @@ void probing_phase() {
     unsigned int udp_port = (unsigned int)atoi(get_value(FILE_NAME, "UDP_dest_port_number"));
     if (udp_port == 0) {
         handle_error(udp_port, "Invalid UDP_dest_port_number");
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE);
     }
 
     int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
