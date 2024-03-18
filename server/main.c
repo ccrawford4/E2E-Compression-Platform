@@ -51,8 +51,11 @@ void recv_udp_packets(int sockfd, unsigned int port_number, int expected_bytes) 
     src_addr.sin_port = htons(port_number);    
 
     ssize_t bytes;
+    printf("Expected bytes: %d\n", expected_bytes);
     while ((bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr))) < expected_bytes) {
+        printf("Bytes before: %ld\n", bytes);
         bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
+        printf("Bytes after: %ld\n", bytes);
     }
 
     printf("Received all %d UDP packets!\n", expected_bytes);  
