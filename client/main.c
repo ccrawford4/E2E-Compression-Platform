@@ -74,10 +74,12 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
         perror("ERROR! Invalid measurement_time");
         exit(EXIT_FAILURE);
     }
+    printf("Waiting...\n");
     wait(timer);
+    printf("Wait time over\n");
     
     // Send high entropy packets
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
 
 }
 

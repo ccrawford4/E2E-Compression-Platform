@@ -77,9 +77,9 @@ void probing_phase() {
 
     int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
 
-    int expected_bytes = atoi((get_value, FILE_NAME, "UDP_packet_train_size"));
+    int expected_bytes = atoi(get_value(FILE_NAME, "UDP_packet_train_size"));
     if (expected_bytes == 0) {
-        handle_error(udp_port, "Invalid UDP_packet_train_size");
+       handle_error(udp_port, "Invalid UDP_packet_train_size");
     }
     recv_udp_packets(udp_socket, udp_port, expected_bytes);
 }
