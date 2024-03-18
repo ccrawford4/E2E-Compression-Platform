@@ -61,8 +61,6 @@ void wait(unsigned int count_down_time_in_secs) {
        x_hours = x_minutes / 60;
 
        time_left = count_down_time_in_secs - x_seconds;
-
-       printf("%d seconds left\n", time_left);
    }
 }
 
@@ -79,7 +77,7 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
     wait(timer);
     
     // Send high entropy packets
-//    send_udp_packets(udp_socket, server_address, udp_dest_port_number, udp_payload_size, udp_packet_train_size, false);
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
 
 }
 
@@ -109,7 +107,6 @@ void probing_phase(char* full_path, const char* server_address) {
     }
 
     probe(full_path, udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size);
-
 }
 
 int main(int argc, char**argv) {

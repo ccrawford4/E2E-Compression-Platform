@@ -39,7 +39,7 @@ void print_out_contents(int sockfd) {
 }
 
 // Receives UDP packets given a port number
-void recv_udp_packets(int sockfd, unsigned int port_number) {
+void recv_udp_packets(int sockfd, unsigned int port_number, ssize_t expected_bytes) {
     char* buffer = (char*)malloc(10000);
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
 
@@ -50,10 +50,12 @@ void recv_udp_packets(int sockfd, unsigned int port_number) {
     src_addr.sin_addr.s_addr = INADDR_ANY;
     src_addr.sin_port = htons(port_number);    
 
-    ssize_t bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
-   if (bytes != -1) {
-      printf("Received all UDP packets!\n");
-   }
+    ssize_t bytes;
+    while ((bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr))) < expected_bytes) {
+        bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
+    }
+
+    printf("Received all %ld UDP packets!\n", expected_bytes);  
 }
 
 // Establishes a TCP Connection
@@ -74,8 +76,12 @@ void probing_phase() {
     }
 
     int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
-    recv_udp_packets(udp_socket, udp_port);
 
+    ssize_t expected_bytes = (ssize_t)atoi((get_value, FILE_NAME, "UDP_packet_train_size"));
+    if (expected_bytes == 0) {
+        handle_error(udp_port, "Invalid UDP_packet_train_size");
+    }
+    recv_udp_packets(udp_socket, udp_port, expected_bytes);
 }
 
 int main(int argc, char**argv) {
