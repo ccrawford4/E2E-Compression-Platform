@@ -39,7 +39,7 @@ void print_out_contents(int sockfd) {
 }
 
 // Receives UDP packets given a port number
-void recv_udp_packets(int sockfd, unsigned int port_number, ssize_t expected_bytes) {
+void recv_udp_packets(int sockfd, unsigned int port_number, int expected_bytes) {
     char* buffer = (char*)malloc(10000);
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
 
@@ -55,7 +55,7 @@ void recv_udp_packets(int sockfd, unsigned int port_number, ssize_t expected_byt
         bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
     }
 
-    printf("Received all %ld UDP packets!\n", expected_bytes);  
+    printf("Received all %d UDP packets!\n", expected_bytes);  
 }
 
 // Establishes a TCP Connection
@@ -77,7 +77,7 @@ void probing_phase() {
 
     int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
 
-    ssize_t expected_bytes = (ssize_t)atoi((get_value, FILE_NAME, "UDP_packet_train_size"));
+    int expected_bytes = atoi((get_value, FILE_NAME, "UDP_packet_train_size"));
     if (expected_bytes == 0) {
         handle_error(udp_port, "Invalid UDP_packet_train_size");
     }
