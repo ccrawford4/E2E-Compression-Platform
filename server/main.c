@@ -95,7 +95,7 @@ void probing_phase() {
 
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_addr.s_addr = INADDR_ANY;
-    serveraddr.sin_port = htons(sockfd);
+    serveraddr.sin_port = htons(udp_port);
 
     if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
         perror("bind()");
