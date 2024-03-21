@@ -111,14 +111,22 @@ void probing_phase() {
     printf("expected bytes: %d\n", expected_bytes);
     printf("bytes before: %d\n", n);
     socklen_t len = sizeof(cliaddr);
-    while ((n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len)) < expected_bytes) {
-        n += recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
+    int num_packets_recv = 0;
+    while (num_packets_recv < expected_bytes) {
+        n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            num_packets_recv += 1;
+            printf("packet %d received\n", num_packets_recv);
+        }
+    }
+   /* while ((n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len)) < expected_bytes) {
+        n recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
         if (n < 0) {
             perror("recvfrom()");
             exit(EXIT_FAILURE);
         }
         printf("bytes after: %d\n", n);
-    }
+    }*/
 
     printf("ALL UDP Packets Received!\n");
     char *hello = "Server Confirms all UDP Packets Received\n";
