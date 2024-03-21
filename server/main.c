@@ -97,7 +97,7 @@ void probing_phase() {
     serveraddr.sin_addr.s_addr = INADDR_ANY;
     serveraddr.sin_port = htons(sockfd);
 
-    if (bind(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
+    if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
         perror("bind()");
         exit(EXIT_FAILURE);
     }
@@ -108,6 +108,7 @@ void probing_phase() {
         handle_error(sockfd, "Invalid UDP_packet_train_size");
     }
     
+    printf("expected bytes: %d\n", expected_bytes);
     printf("bytes before: %d\n", n);
     socklen_t len = sizeof(cliaddr);
     while ((n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len)) < expected_bytes) {
