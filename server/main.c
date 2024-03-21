@@ -1,6 +1,7 @@
 #include "main.h"
 
 #define MAX_BUFFER_LEN 1000
+#define MAX_LINE 1024
 #define FILE_NAME "config.json"
 
 // Write the JSON contents to the config.json file
@@ -78,13 +79,62 @@ void probing_phase() {
         exit(EXIT_FAILURE);
     }
 
-    int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
+    int sockfd;
+    char* buffer = (char*)malloc(1000);
+    if (buffer == NULL) {
+        perror("Memory Allocation Failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    struct sockaddr_in serveraddr, cliaddr;
+
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket()");
+        exit(EXIT_FAILURE);
+    }
+
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = INADDR_ANY;
+    serveraddr.sin_port = htons(sockfd);
+
+    if (bind(sockfd, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
+        perror("bind()");
+        exit(EXIT_FAILURE);
+    }
+
+    int n;
+    int expected_bytes = atoi(get_value(FILE_NAME, "UDP_packet_train_size"));
+    if (expected_bytes == 0) {
+        handle_error(sockfd, "Invalid UDP_packet_train_size");
+    }
+    
+    printf("bytes before: %d\n", n);
+    socklen_t len = sizeof(cliaddr);
+    while ((n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len)) < expected_bytes) {
+        n += recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n < 0) {
+            perror("recvfrom()");
+            exit(EXIT_FAILURE);
+        }
+        printf("bytes after: %d\n", n);
+    }
+
+    printf("ALL UDP Packets Received!\n");
+    char *hello = "Server Confirms all UDP Packets Received\n";
+    int bytes_sent = sendto(sockfd, hello, strlen(hello), 0, (struct sockaddr *)&cliaddr, len);
+    if (bytes_sent <= 0) {
+        perror("sendto()");
+        exit(EXIT_FAILURE);
+    }
+
+   
+  /*  int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
 
     int expected_bytes = atoi(get_value(FILE_NAME, "UDP_packet_train_size"));
     if (expected_bytes == 0) {
        handle_error(udp_port, "Invalid UDP_packet_train_size");
     }
-    recv_udp_packets(udp_socket, udp_port, expected_bytes);
+    recv_udp_packets(udp_socket, udp_port, expected_bytes);*/
 }
 
 int main(int argc, char**argv) {
