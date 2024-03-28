@@ -39,32 +39,6 @@ void tcp_connection(char* full_path, char* key, const char* server_address) {
     receive_server_msg(tcp_socket);
 }
 
-
-// Given a time (in seconds) it pauses the program
-void wait(unsigned int count_down_time_in_secs) {
-    unsigned int x_hours = 0;
-    unsigned int x_minutes = 0;
-    unsigned int x_seconds = 0;
-    unsigned int x_milliseconds = 0;
-    unsigned int total_time = 0, time_left = 0;
-
-    clock_t start_time, x_count_time;
-   
-   start_time = clock();
-   time_left = count_down_time_in_secs - x_seconds; // Update timer
-
-   while (time_left > 0) {
-       x_count_time = clock();
-       x_milliseconds = x_count_time - start_time;
-       x_seconds = (x_milliseconds / (CLOCKS_PER_SEC) - (x_minutes * 60));
-       x_minutes = (x_milliseconds / (CLOCKS_PER_SEC)) / 60;
-       x_hours = x_minutes / 60;
-
-       time_left = count_down_time_in_secs - x_seconds;
-   }
-}
-
-
 void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {
     unsigned int timer = (unsigned int)atoi(get_value(full_path, "measurement_time"));
     if (timer == 0) {

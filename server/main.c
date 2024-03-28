@@ -52,12 +52,12 @@ void recv_udp_packets(int sockfd, unsigned int port_number, int expected_bytes) 
     src_addr.sin_port = htons(port_number);    
 
     ssize_t bytes;
-    printf("Expected bytes: %d\n", expected_bytes);
+  /*  printf("Expected bytes: %d\n", expected_bytes);
     while ((bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr))) < expected_bytes) {
         printf("Bytes before: %ld\n", bytes);
         bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
         printf("Bytes after: %ld\n", bytes);
-    }
+    }*/
 
     printf("Received all %d UDP packets!\n", expected_bytes);  
 }
@@ -103,14 +103,11 @@ void probing_phase() {
     }
 
     int n;
-    int expected_bytes = atoi(get_value(FILE_NAME, "UDP_packet_train_size"));
-    if (expected_bytes == 0) {
-        handle_error(sockfd, "Invalid UDP_packet_train_size");
-    }
-    
-    printf("expected bytes: %d\n", expected_bytes);
+    unsigned int server_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "server_wait_time"));
+
+
     socklen_t len = sizeof(cliaddr);
-    int num_packets_recv = 1;
+  /*  int num_packets_recv = 1;
     while (num_packets_recv <= expected_bytes) {
         n = recvfrom(sockfd, buffer, 1000, 0, (struct sockaddr *)&cliaddr, &len);
         if (n > 0) {
@@ -135,7 +132,7 @@ void probing_phase() {
     if (bytes_sent <= 0) {
         perror("sendto()");
         exit(EXIT_FAILURE);
-    }
+    }*/
 
 }
 
