@@ -65,21 +65,27 @@ void wait(unsigned int count_down_time_in_secs) {
 }
 
 
-void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) { 
-    // Send low entropy
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
-
+void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {
     unsigned int timer = (unsigned int)atoi(get_value(full_path, "measurement_time"));
     if (timer == 0) {
         perror("ERROR! Invalid measurement_time");
         exit(EXIT_FAILURE);
     }
+    unsigned int server_wait_time = (unsigned int)atoi(get_value(full_path, "server_wait_time"));
+    if (server_wait_time == 0) {
+        perror("ERROR! Invalid server wait time");
+        exit(EXIT_FAILURE);
+    }
+
+    // Send low entropy
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    wait(server_wait_time);             // Performs the wait time to make sure all the inital packets got there
     printf("Waiting...\n");
     wait(timer);
     printf("Wait time over\n");
-    
     // Send high entropy packets
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    wait(server_wait_time);
 
 }
 

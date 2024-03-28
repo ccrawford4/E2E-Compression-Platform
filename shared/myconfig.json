@@ -9,6 +9,7 @@
   "UDP_payload_size": "1000B",
   "measurement_time": "15",
   "UDP_packet_train_size": "6000",
-  "UDP_packet_TTL": "225"
+  "UDP_packet_TTL": "225",
+  "server_wait_time": "5"
 }
 
