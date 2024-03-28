@@ -104,35 +104,21 @@ void probing_phase() {
 
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "server_wait_time"));
-
-
     socklen_t len = sizeof(cliaddr);
-  /*  int num_packets_recv = 1;
-    while (num_packets_recv <= expected_bytes) {
-        n = recvfrom(sockfd, buffer, 1000, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n > 0) {
-            num_packets_recv += 1;
-            memset(buffer, 0, sizeof(buffer));
-            printf("packet %d received\n", num_packets_recv);
-        }
-    }
-    printf("First round received\n");
-    num_packets_recv = 0;
-    while (num_packets_recv <= expected_bytes) {
-        n = recvfrom(sockfd, buffer, 1000, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n > 0) {
-            num_packets_recv += 1;
-            printf("packet %d received\n", num_packets_recv);
-        }
-    }
 
-    printf("ALL UDP Packets Received!\n");
-    char *hello = "Server Confirms all UDP Packets Received\n";
-    int bytes_sent = sendto(sockfd, hello, strlen(hello), 0, (struct sockaddr *)&cliaddr, len);
-    if (bytes_sent <= 0) {
-        perror("sendto()");
-        exit(EXIT_FAILURE);
-    }*/
+    struct timeval start, end, last_packet_time;
+    double elapsed = 0.0;
+
+    gettimeofday(&start, NULL);
+    last_packet_time = start;
+
+    while (true) {
+        fd_set set;
+        struct timeval timeout;
+
+        FD_ZERO(&set);
+        FD_SET(udp_port, &set
+    }
 
 }
 
