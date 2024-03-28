@@ -1,7 +1,7 @@
 #include "main.h"
 
 #define MAX_BUFFER_LEN 1000
-#define MAX_LINE 1024
+#define MAX_LINE 1000
 #define FILE_NAME "config.json"
 
 // Write the JSON contents to the config.json file
@@ -41,7 +41,7 @@ void print_out_contents(int sockfd) {
 
 // Receives UDP packets given a port number
 void recv_udp_packets(int sockfd, unsigned int port_number, int expected_bytes) {
-    char* buffer = (char*)malloc(10000);
+    char* buffer = (char*)malloc(1000);
     memset(buffer, 0, sizeof(buffer) / sizeof(char));
 
     struct sockaddr_in src_addr;
@@ -109,24 +109,25 @@ void probing_phase() {
     }
     
     printf("expected bytes: %d\n", expected_bytes);
-    printf("bytes before: %d\n", n);
     socklen_t len = sizeof(cliaddr);
-    int num_packets_recv = 0;
-    while (num_packets_recv < expected_bytes) {
-        n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
+    int num_packets_recv = 1;
+    while (num_packets_recv <= expected_bytes) {
+        n = recvfrom(sockfd, buffer, 1000, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            num_packets_recv += 1;
+            memset(buffer, 0, sizeof(buffer));
+            printf("packet %d received\n", num_packets_recv);
+        }
+    }
+    printf("First round received\n");
+    num_packets_recv = 0;
+    while (num_packets_recv <= expected_bytes) {
+        n = recvfrom(sockfd, buffer, 1000, 0, (struct sockaddr *)&cliaddr, &len);
         if (n > 0) {
             num_packets_recv += 1;
             printf("packet %d received\n", num_packets_recv);
         }
     }
-   /* while ((n = recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len)) < expected_bytes) {
-        n recvfrom(sockfd, buffer, MAX_LINE, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n < 0) {
-            perror("recvfrom()");
-            exit(EXIT_FAILURE);
-        }
-        printf("bytes after: %d\n", n);
-    }*/
 
     printf("ALL UDP Packets Received!\n");
     char *hello = "Server Confirms all UDP Packets Received\n";
@@ -136,14 +137,6 @@ void probing_phase() {
         exit(EXIT_FAILURE);
     }
 
-   
-  /*  int udp_socket = init_socket(udp_port, SOCK_DGRAM);  
-
-    int expected_bytes = atoi(get_value(FILE_NAME, "UDP_packet_train_size"));
-    if (expected_bytes == 0) {
-       handle_error(udp_port, "Invalid UDP_packet_train_size");
-    }
-    recv_udp_packets(udp_socket, udp_port, expected_bytes);*/
 }
 
 int main(int argc, char**argv) {
