@@ -94,7 +94,6 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
         abort();
     }
 
-    printf("Packet Size: %d\n", packet_size);
     for (int i = 0; i < num_packets; i++) {
         ssize_t bytes_sent;
         // low entropy data is composed of zeros

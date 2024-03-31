@@ -71,6 +71,40 @@ void establish_tcp_connection(unsigned int server_port) {
     print_out_contents(client_socket); // For testing and sending confirmation   
 }
 
+double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
+    char* buffer = (char*)malloc(1000);
+    socklen_t len = sizeof(cliaddr);
+    int n;
+
+    struct timespec start_time, current_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+
+    while (true) {
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+        double elapsed = (current_time.tv_sec - start_time.tv_sec);
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        
+        if (elapsed >= server_wait_time) {
+            printf("Time limit reached. Server stopping.\n");
+            break;
+        }
+
+        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            end_time = current_time;
+        }
+    }
+
+    double total_elapsed = (end_time.tv_sec - start_time.tv_sec);
+    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+
+    free(buffer);
+
+    return total_elapsed;
+
+}
+
 // Probing Phase -> receive UDP packets from the sender
 void probing_phase() { 
     unsigned int udp_port = (unsigned int)atoi(get_value(FILE_NAME, "UDP_dest_port_number"));
@@ -104,57 +138,10 @@ void probing_phase() {
 
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "server_wait_time"));
-    socklen_t len = sizeof(cliaddr);
-    
-    struct timespec start_time, current_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-
-    while (true) {
-        clock_gettime(CLOCK_MONOTONIC, &current_time);
-        double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
-        
-        if (elapsed > server_wait_time) {
-            printf("Time limit reached. Server stopping.\n");
-            break;
-        }
-
-        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n > 0) {
-            end_time = current_time;
-        }
-    }
-
-    double total_elapsed = (end_time.tv_sec - start_time.tv_sec);
-    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
-
-    printf("ROUND ONE: Total time for packets: %.10f seconds\n", total_elapsed);
-
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    
-    while (true) {
-        clock_gettime(CLOCK_MONOTONIC, &current_time);
-        double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
-        
-        if (elapsed > server_wait_time) {
-            printf("Time limit reached. Server stopping.\n");
-            break;
-        }
-
-        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n > 0) {
-            end_time = current_time;
-        }
-    }
-    
-    total_elapsed = (end_time.tv_sec - start_time.tv_sec);
-    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
-
-    printf("ROUND TWO: Total time for packets: %.10f seconds\n", total_elapsed);
-
+    double time_one = calc_stream_time(server_wait_time, cliaddr, sockfd);
+    printf("Time one: %.10f", time_one);
+    double time_two = calc_stream_time(server_wait_time, cliaddr, sockfd);
+    printf("Time two: %.10f", time_two);
 
 }
 
