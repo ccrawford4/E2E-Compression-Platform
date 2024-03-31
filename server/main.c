@@ -126,10 +126,10 @@ void probing_phase() {
         }
     }
 
-    double elapsed = (end_time.tv_sec - start_time.tv_sec);
-    elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+    double total_elapsed = (end_time.tv_sec - start_time.tv_sec);
+    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
 
-    printf("ROUND ONE: Total time for packets: %.3f seconds\n", elapsed);
+    printf("ROUND ONE: Total time for packets: %.10f seconds\n", total_elapsed);
 
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     clock_gettime(CLOCK_MONOTONIC, &end_time);
@@ -150,10 +150,10 @@ void probing_phase() {
         }
     }
     
-    elapsed = (end_time.tv_sec - start_time.tv_sec);
-    elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+    total_elapsed = (end_time.tv_sec - start_time.tv_sec);
+    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
 
-    printf("ROUND TWO: Total time for packets: %.3f seconds\n", elapsed);
+    printf("ROUND TWO: Total time for packets: %.10f seconds\n", total_elapsed);
 
 
 }
