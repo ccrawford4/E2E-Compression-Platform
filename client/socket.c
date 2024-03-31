@@ -100,7 +100,6 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
         // low entropy data is composed of zeros
         if (low_entropy) {
             bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
-            printf("Bytes sent: %ld\n", bytes_sent);
             if (bytes_sent != packet_size) {
                 perror("sendto()");
             }
