@@ -18,12 +18,14 @@ void wait(unsigned int count_down_time_in_secs) {
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
         double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0; 
         
         if (elapsed >= count_down_time_in_secs) {
             printf("Time limit reached. Server stopping.\n");
             break;
         }
+
+        printf("Elapsed: %ld\n", elapsed);
     
     }
   

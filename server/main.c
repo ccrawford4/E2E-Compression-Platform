@@ -83,7 +83,7 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
         double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
 
         printf("Elapsed: %ld\n", elapsed);
         
