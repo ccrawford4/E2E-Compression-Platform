@@ -6,7 +6,7 @@ void send_file_contents(int sockfd, char* file_path) {
     char* file_contents = read_file(file_path);
     int len = strlen(file_contents);
     if (send_bytes(sockfd, file_contents, len, 0)) {
-        printf("Sending complete.\n");
+      //  printf("Sending complete.\n");
     } else {
         handle_error(sockfd, "Send()");
     }
@@ -22,7 +22,7 @@ void receive_server_msg(int sockfd) {
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
     }
-   printf("Server Message: %s\n", buffer);
+ //  printf("Server Message: %s\n", buffer);
     free(buffer);
 }
 
@@ -52,14 +52,19 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
     }
 
     // Send low entropy
+    printf("Sending first round of packets...\n");
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    printf("Server wait time...\n");
     wait(server_wait_time);             // Performs the wait time to make sure all the inital packets got there
-    printf("Waiting...\n");
+    printf("Measurement wait time...\n");
     wait(timer);
-    printf("Wait time over\n");
     // Send high entropy packets
+    printf("Sending second round of packets...\n");
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    printf("Server wait time..\n");
     wait(server_wait_time);
+
+    printf("Done\n");
 
 }
 

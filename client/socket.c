@@ -33,8 +33,8 @@ int init_udp_socket(unsigned short server_port) {
 
 // Establishes a TCP connection given the server's IP address and port number
 int establish_connection(char* server_ip, unsigned short server_port) {
-  printf("Server IP: %s\n", server_ip);
-  printf("Server Port: %d\n", server_port);
+ // printf("Server IP: %s\n", server_ip);
+//  printf("Server Port: %d\n", server_port);
    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
    struct sockaddr_in sin;
