@@ -105,20 +105,56 @@ void probing_phase() {
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "server_wait_time"));
     socklen_t len = sizeof(cliaddr);
-
-    struct timeval start, end, last_packet_time;
-    double elapsed = 0.0;
-
-    gettimeofday(&start, NULL);
-    last_packet_time = start;
+    
+    struct timespec start_time, current_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
 
     while (true) {
-        fd_set set;
-        struct timeval timeout;
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+        double elapsed = (current_time.tv_sec - start_time.tv_sec);
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        
+        if (elapsed > server_wait_time) {
+            printf("Time limit reached. Server stopping.\n");
+            break;
+        }
 
-        FD_ZERO(&set);
-        FD_SET(udp_port, &set
+        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            end_time = current_time;
+        }
     }
+
+    double elapsed = (end_time.tv_sec - start_time.tv_sec);
+    elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+
+    printf("ROUND ONE: Total time for packets: %.3f seconds\n", elapsed);
+
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+    
+    while (true) {
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+        double elapsed = (current_time.tv_sec - start_time.tv_sec);
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        
+        if (elapsed > server_wait_time) {
+            printf("Time limit reached. Server stopping.\n");
+            break;
+        }
+
+        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n > 0) {
+            end_time = current_time;
+        }
+    }
+    
+    elapsed = (end_time.tv_sec - start_time.tv_sec);
+    elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+
+    printf("ROUND TWO: Total time for packets: %.3f seconds\n", elapsed);
+
 
 }
 

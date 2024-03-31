@@ -11,6 +11,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define PATH_PREFIX "../shared/" 
 const char* get_value(char* file_path, char* key);
