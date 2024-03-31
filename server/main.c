@@ -79,11 +79,13 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
     struct timespec start_time, current_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     clock_gettime(CLOCK_MONOTONIC, &end_time);
-
+    
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
         double elapsed = (current_time.tv_sec - start_time.tv_sec);
         elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+
+        printf("Elapsed: %ld\n", elapsed);
         
         if (elapsed >= server_wait_time) {
             printf("Time limit reached. Server stopping.\n");
@@ -138,8 +140,10 @@ void probing_phase() {
 
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "server_wait_time"));
+    unsigned int client_wait_time = (unsigned int)atoi(get_value(FILE_NAME, "measurement_time"));
     double time_one = calc_stream_time(server_wait_time, cliaddr, sockfd);
     printf("Time one: %.10f", time_one);
+    wait(client_wait_time);
     double time_two = calc_stream_time(server_wait_time, cliaddr, sockfd);
     printf("Time two: %.10f", time_two);
 
