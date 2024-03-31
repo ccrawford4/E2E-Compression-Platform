@@ -11,7 +11,25 @@ void handle_error(int sockfd, char* error_msg) {
 
 // Given a time (in seconds) it pauses the program
 void wait(unsigned int count_down_time_in_secs) {
-    unsigned int x_hours = 0;
+    struct timespec start_time, current_time, end_time;
+    clock_gettime(CLOCK_MONOTONIC, &start_time);
+    clock_gettime(CLOCK_MONOTONIC, &end_time);
+
+    while (true) {
+        clock_gettime(CLOCK_MONOTONIC, &current_time);
+        double elapsed = (current_time.tv_sec - start_time.tv_sec);
+        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+        
+        if (elapsed >= count_down_time_in_secs) {
+            printf("Time limit reached. Server stopping.\n");
+            break;
+        }
+    
+    }
+
+}
+
+   /* unsigned int x_hours = 0;
     unsigned int x_minutes = 0;
     unsigned int x_seconds = 0;
     unsigned int x_milliseconds = 0;
@@ -30,7 +48,7 @@ void wait(unsigned int count_down_time_in_secs) {
        x_hours = x_minutes / 60;
 
        time_left = count_down_time_in_secs - x_seconds;
-   }
+   }*/
 }
 
 char* read_file(char* file_path) {
