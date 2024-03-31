@@ -1,5 +1,4 @@
 #include "shared.h"
-
 #define MAX_KEY_LEN 100
 
 
@@ -10,25 +9,8 @@ void handle_error(int sockfd, char* error_msg) {
 }
 
 // Given a time (in seconds) it pauses the program
-void wait(unsigned int count_down_time_in_secs) {
-    struct timespec start_time, current_time, end_time;
-    clock_gettime(CLOCK_MONOTONIC, &start_time);
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-
-    while (true) {
-        clock_gettime(CLOCK_MONOTONIC, &current_time);
-        double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0; 
-        
-        if (elapsed >= count_down_time_in_secs) {
-            printf("Time limit reached. Server stopping.\n");
-            break;
-        }
-
-        printf("Elapsed: %ld\n", elapsed);
-    
-    }
-  
+void wait(unsigned int seconds) {
+    usleep(seconds * 1000000);
 }
 
 char* read_file(char* file_path) {
