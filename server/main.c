@@ -71,40 +71,45 @@ void establish_tcp_connection(unsigned int server_port) {
     print_out_contents(client_socket); // For testing and sending confirmation   
 }
 
+
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
-    char* buffer = (char*)malloc(1000);
+    char* buffer = (char*)malloc(1000); // Allocate buffer correctly
     socklen_t len = sizeof(cliaddr);
     int n;
 
+    // Set a timeout for recvfrom
+    struct timeval timeout;
+    timeout.tv_sec = server_wait_time; // Set the timeout to server_wait_time seconds
+    timeout.tv_usec = 0; // No microseconds
+    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+        perror("setsockopt failed");
+    }
+
     struct timespec start_time, current_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
-    clock_gettime(CLOCK_MONOTONIC, &end_time);
-    
+    end_time = start_time; // Initialize end_time to start_time
+
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
-        double elapsed = (current_time.tv_sec - start_time.tv_sec);
-        elapsed += (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
+        double elapsed = (current_time.tv_sec - start_time.tv_sec) + 
+                         (current_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
 
-        printf("Elapsed: %ld\n", elapsed);
-        
         if (elapsed >= server_wait_time) {
-            printf("Time limit reached. Server stopping.\n");
             break;
         }
 
-        n = recvfrom(sockfd, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&cliaddr, &len);
+        n = recvfrom(sockfd, buffer, 1000 - 1, 0, (struct sockaddr *)&cliaddr, &len); // Use correct buffer size
         if (n > 0) {
-            end_time = current_time;
+            end_time = current_time; // Update end_time each time data is received
         }
     }
 
-    double total_elapsed = (end_time.tv_sec - start_time.tv_sec);
-    total_elapsed += (end_time.tv_nsec - start_time.tv_nsec) / 0x3B9ACA00;
+    double total_elapsed = (end_time.tv_sec - start_time.tv_sec) +
+                           (end_time.tv_nsec - start_time.tv_nsec) / 1000000000.0;
 
-    free(buffer);
+    free(buffer); // Free allocated memory
 
     return total_elapsed;
-
 }
 
 // Probing Phase -> receive UDP packets from the sender
