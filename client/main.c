@@ -115,7 +115,25 @@ int main(int argc, char**argv) {
 
      const char* server_addr = get_value(full_path, "server_ip");
 
+     time_t rawtime;
+     struct tm * timeinfo;
+  //   time (&rawtime);
+  //   timeinfo = localtime (&rawtime);
+
+   /*  printf("Current local time and date: %s minutes: %d seconds: %d\n", asctime (timeinfo), timeinfo->tm_min, timeinfo->tm_sec);
+     wait(5);
+     time (&rawtime);
+     timeinfo = localtime (&rawtime);
+     printf("Current local time and date: %s minutes: %d seconds: %d\n", asctime (timeinfo), timeinfo->tm_min, timeinfo->tm_sec);  */
+
+     unsigned int measurement_time = (unsigned int)atoi(get_value(full_path, "measurement_time"));
+     time (&rawtime);
+     timeinfo = localtime (&rawtime);
+
+     printf("Time at TCP Connection: %s\n", asctime (timeinfo));
      tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
+     
+     printf("Time at Probing Phase: %s\n", asctime (timeinfo)):
      probing_phase(full_path, server_addr);                                // Probing Phase
  //   tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
    

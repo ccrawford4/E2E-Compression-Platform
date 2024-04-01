@@ -162,7 +162,14 @@ int main(int argc, char**argv) {
         return EXIT_FAILURE;
     }
     
+    time_t rawtime;
+    struct tm * timeinfo;
+
     establish_tcp_connection(server_port);         // Pre-Probing TCP Phase Connection
+    
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+    printf("Current time before probing phase: %s\n", asctime (timeinfo));
     probing_phase();                               // Probing Phase
         
     return EXIT_SUCCESS;
