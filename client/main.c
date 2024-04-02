@@ -28,15 +28,15 @@ void receive_server_msg(int sockfd) {
 
 // Establishes a TCP connection
 void tcp_connection(char* full_path, char* key, const char* server_address) {
-    unsigned short server_port = (unsigned short)atoi(get_value(full_path, key));
-    if (server_port == 0) {
+    unsigned short port = (unsigned short)atoi(get_value(full_path, key));
+    if (port == 0) {
         perror("Error! Invalid TCP_PREPROB_port_number");
         exit(EXIT_FAILURE);
     }
 
-    int tcp_socket = establish_connection(server_address, server_port);
-    send_file_contents(tcp_socket, full_path);
-    receive_server_msg(tcp_socket);
+    int sockfd = establish_connection(server_address, port);
+    send_file_contents(sockfd, full_path);
+    receive_server_msg(sockfd);
 }
 
 void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {

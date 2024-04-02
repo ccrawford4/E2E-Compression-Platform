@@ -32,25 +32,42 @@ int init_udp_socket(unsigned short src_port) {
 }
 
 // Establishes a TCP connection given the server's IP address and port number
-int establish_connection(char* server_ip, unsigned short server_port) {
- // printf("Server IP: %s\n", server_ip);
-//  printf("Server Port: %d\n", server_port);
+int establish_connection(char* server_ip, unsigned short port) {
    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+   if (sockfd < 0) {
+     perror("socket()");
+     exit(EXIT_FAILURE);
+   }
+
+    struct sockaddr_in local_addr;
+    memset(&local_addr, 0, sizeof(local_addr));
+    local_addr.sin_family = AF_INET;
+    local_addr.sin_addr.s_addr = INADDR_ANY;
+    local_addr.sin_port = htons(port);
+
+    if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr)) < 0) {
+        perror("bind()");
+        exit(EXIT_FAILURE);
+    }
 
    struct sockaddr_in sin;
    struct hostent *host = gethostbyname(server_ip);
+   if (host == NULL) {
+        perror("Error resolving host");
+        exit(EXIT_FAILURE);
+   }
+
    in_addr_t server_addr = *(in_addr_t *) host->h_addr_list[0];
-
    memset(&sin, 0, sizeof(sin));  
-
    sin.sin_family = AF_INET;
    sin.sin_addr.s_addr = server_addr;
-   sin.sin_port = htons(server_port);
+   sin.sin_port = htons(port);
 
    if (connect(sockfd, (struct sockaddr *) &sin, sizeof(sin)) < 0) {
         perror("cannont connect to server");
-        abort();
+        exit(EXIT_FAILURE);
    }
+
    return sockfd;
 }
 
