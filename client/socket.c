@@ -9,24 +9,24 @@
 
 
 // Creates and returns a valid UDP socket
-int init_udp_socket(unsigned short server_port) {
-    struct sockaddr_in server_addr;
+int init_udp_socket(unsigned short src_port) {
+    struct sockaddr_in client_addr;
     int sockfd;
 
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("Could not create UDP socket");
         abort();
     }
-    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
 
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(server_port);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_port = htons(src_port);
+    client_addr.sin_addr.s_addr = INADDR_ANY;
 
-   /* if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-        perror("connect()");
+    if (bind(sockfd, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0) {
+        perror("bind()");
         abort();
-    }*/
+    }
 
     return sockfd;
 }
