@@ -105,32 +105,39 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
         abort();
     }
 
-    char *packet = (char*)malloc(packet_size);
-    memset(packet, 0, packet_size);
-    if (packet == NULL) {
+    char *payload = (char*)malloc(packet_size);
+    if (payload == NULL) {
         perror("Memory allocation failed\n");
         abort();
     }
+    memset(payload, 0, packet_size);
     
     FILE *fp = fopen(RANDOM_FILE, "rb");
     if (fp == NULL) {
-        free(packet);
+        free(payload);
         printf("Error Opening File %s\n", RANDOM_FILE);
         exit(EXIT_FAILURE);
     }
+    
 
     for (int i = 0; i < num_packets; i++) {
+        // first two bytes should = 0000 0000
+        // for part one doesn't matter as much
+
         if (!low_entropy) {
             fseek(fp, 0, SEEK_SET);
-            size_t bytes_read = fread(packet, 1, packet_size, fp);
+            size_t bytes_read = fread(payload, 1, packet_size, fp);
             if (bytes_read < packet_size) {
                 fprintf(stderr, "Failed to read %d bytes from the file for packet %d.\n", packet_size, i);
                 break;
             }
-            fread(packet, packet_size, packet_size, fp);
         }
+        
+        // Set the payload ID
+        payload[0] = i & 0xFF;
+        payload[1] = (i >> 8) & 0xFF;
 
-        ssize_t bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+        ssize_t bytes_sent = sendto(sockfd, payload, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
         if (bytes_sent < 0) {
             perror("sendto()");
             exit(EXIT_FAILURE);
@@ -138,7 +145,7 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
     }
 
     fclose(fp);
-    free(packet);
+    free(payload);
 }
 
 
