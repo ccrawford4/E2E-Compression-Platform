@@ -75,8 +75,9 @@ void probing_phase(char* full_path, const char* server_address) {
         perror("ERROR! Invalid UDP_src_port_number");
         exit(EXIT_FAILURE);
     }
+    int udp_src_port = atoi(get_value(full_path, "UDP_src_port_number"));
 
-    int udp_socket = init_udp_socket(udp_dest_port);
+    int udp_socket = init_udp_socket(udp_src_port);
     char* udp_payload_string = (char*)get_value(full_path, "UDP_payload_size");
     int len = strlen(udp_payload_string);
     *(udp_payload_string + len - 1) = '\0';         // Remove the 'B' from the payload_size
