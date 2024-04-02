@@ -114,23 +114,30 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
     
     FILE *fp = fopen(RANDOM_FILE, "rb");
     if (fp == NULL) {
-        fclose(fp);
+        free(packet);
         printf("Error Opening File %s\n", RANDOM_FILE);
         exit(EXIT_FAILURE);
     }
 
     for (int i = 0; i < num_packets; i++) {
-        ssize_t bytes_sent;
         if (!low_entropy) {
-            fread(packet, sizeof(packet), packet_size, fp);
+            fseek(fp, 0, SEEK_SET);
+            size_t bytes_read = fread(packet, 1, packet_size, fp);
+            if (bytes_read < packet_size) {
+                fprintf(stderr, "Failed to read %d bytes from the file for packet %d.\n", packet_size, i);
+                break;
+            }
+            fread(packet, packet_size, packet_size, fp);
         }
-        bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
+
+        ssize_t bytes_sent = sendto(sockfd, packet, packet_size, 0, (const struct sockaddr *)&server_addr, sizeof(server_addr));
         if (bytes_sent < 0) {
             perror("sendto()");
             exit(EXIT_FAILURE);
         }
     }
 
+    fclose(fp);
     free(packet);
 }
 

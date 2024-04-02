@@ -60,7 +60,7 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
     wait(timer);
     // Send high entropy packets
     printf("Sending second round of packets...\n");
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
     printf("Server wait time..\n");
     wait(server_wait_time);
 
