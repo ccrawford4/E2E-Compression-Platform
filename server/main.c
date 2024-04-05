@@ -57,7 +57,7 @@ void recv_config_file(int sockfd) {
     }
 
     char* server_msg = "Config File Received!";
-    send_packets(sockfd, server_msg, strlen(server_msg) + 1);
+    send_bytes(sockfd, server_msg, strlen(server_msg) + 1, 0);
 }
 
 void send_results(int sockfd) {
@@ -74,7 +74,7 @@ void send_results(int sockfd) {
 
     int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
     fclose(stream);
-    int packets = send_packets(sockfd, buffer, n);
+    int packets = send_bytes(sockfd, buffer, n, 0);
     if (packets != n) {
         perror("ERROR! Not all the packets were received");
         close(sockfd);
@@ -82,42 +82,16 @@ void send_results(int sockfd) {
     }
 }
 
-// Receives UDP packets given a port number
-void recv_udp_packets(int sockfd, unsigned int port_number, int expected_bytes) {
-    char* buffer = (char*)malloc(1000);
-    memset(buffer, 0, sizeof(buffer) / sizeof(char));
-
-    struct sockaddr_in src_addr;
-    memset(&src_addr, 0, sizeof(src_addr));
-
-    src_addr.sin_family = AF_INET;
-    src_addr.sin_addr.s_addr = INADDR_ANY;
-    src_addr.sin_port = htons(port_number);    
-
-    ssize_t bytes;
-  /*  printf("Expected bytes: %d\n", expected_bytes);
-    while ((bytes = receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr))) < expected_bytes) {
-        printf("Bytes before: %ld\n", bytes);
-        bytes += receive_udp_payload(sockfd, (struct sockaddr *)&src_addr, (socklen_t)sizeof(src_addr));
-        printf("Bytes after: %ld\n", bytes);
-    }*/
-
-    printf("Received all %d UDP packets!\n", expected_bytes);  
-}
-
 // Establishes a TCP Connection
 void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
     int tcp_socket = init_socket(server_port, SOCK_STREAM);
-    int client_socket = server_listen(tcp_socket);
-    
+    int client_socket = server_listen(tcp_socket);    
     if (pre_prob) {
         recv_config_file(client_socket);
     } else {
        send_results(client_socket); 
-    }
-     
+    }    
 }
-
 
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
     char* buffer = (char*)malloc(1000); // Allocate buffer correctly

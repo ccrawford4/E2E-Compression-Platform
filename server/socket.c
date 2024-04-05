@@ -1,16 +1,5 @@
 #include "main.h"
 
-// Send TCP packets
-int send_packets(int client_socket, char *buffer, int buffer_len) {
-    size_t sent_bytes = send(client_socket, buffer, buffer_len, 0);
-    
-    if (sent_bytes < 0) {
-        handle_error(client_socket, "sendto() failed");
-    }
-    return sent_bytes;
-}
-
-
 // Binds socket
 void bind_socket(int sockfd, unsigned short server_port) {
     int optval = 1;
