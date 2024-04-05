@@ -7,22 +7,6 @@
 #define CONFIG_FILE "config.json"
 #define RESULT_FILE "result.txt"
 
-// Write the JSON contents to the config.json file
-void write_contents_to_file(char* file_name, char* buffer, size_t buffer_size) {
-    FILE* fp = fopen(file_name, "w");
-    if (fp == NULL) {
-        perror("Failed to open file");
-        exit(EXIT_FAILURE);
-    }
-    
-    size_t bytes_written = fwrite(buffer, 1, buffer_size, fp);
-    if (bytes_written < strlen(buffer)) {
-          perror("Failed to write full buffer to file");
-    }
-
-    free(buffer);
-    fclose(fp);
-}
 
 bool calc_results(double time_one, double time_two) {
     double diff = abs(time_one - time_two);

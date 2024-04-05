@@ -13,25 +13,15 @@ void send_file_contents(int sockfd, char* file_path) {
     free(file_contents);
 }
 
-void write_file_contents(char* buffer, int len) {
-    FILE* fp = fopen(RESULT_FILE, "w");
-    if (fp == NULL) {
-        perror("Failed to open the file");
-        exit(EXIT_FAILURE);
-    }
-
-    size_t bytes_written = fwrite(buffer, 1, len, fp);
-    if (bytes_written < len) {
-        perror("Failed to write full buffer to file");
-    }
-    fclose(fp);
-
-}
 // Receives messages from the server
 void receive_server_msg(int sockfd, bool pre_prob) {
     char *buffer = (char*)malloc(MAX_BUFFER_LEN);
+    if (buffer == NULL) {
+        perror("Error Allocating Memory");
+        exit(EXIT_FAILURE);
+    }
+    size_t buffer_size = sizeof(buffer);
     memset(buffer, 0, sizeof(buffer));
-    int len = strlen(buffer);
     int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
@@ -39,7 +29,8 @@ void receive_server_msg(int sockfd, bool pre_prob) {
     if (pre_prob) {
         printf("[server]: %s\n", buffer);
     } else {
-        write_file_contents(buffer, len);
+        printf("buffer received: %s\n", buffer);
+        write_contents_to_file(RESULT_FILE, buffer, buffer_size);
         printf("[client]: Received Results From Server!\n");
     }
 
