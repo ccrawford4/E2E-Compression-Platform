@@ -62,7 +62,6 @@ void recv_config_file(int sockfd) {
 
 void send_results(int sockfd) {
     char buffer[MAX_BUFFER_LEN]; 
-    int n = strlen(buffer);
 
     // read the file contents into the buffer
     FILE *stream = fopen(RESULT_FILE, "r");
@@ -74,6 +73,7 @@ void send_results(int sockfd) {
 
     int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
     fclose(stream);
+    int n = strlen(buffer);
     int packets = send_bytes(sockfd, buffer, n, 0);
     if (packets != n) {
         perror("ERROR! Not all the packets were received");
