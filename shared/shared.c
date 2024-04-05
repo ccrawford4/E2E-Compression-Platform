@@ -55,6 +55,7 @@ char* read_file(char* file_path) {
     return buffer;
 }
 
+// Send bytes using a TCP connection
 int send_bytes(int sockfd, char *buf, int len, int flags) {
     ssize_t bytes_sent = send(sockfd, buf, len, flags);
     if (bytes_sent == -1) {
@@ -67,6 +68,7 @@ int send_bytes(int sockfd, char *buf, int len, int flags) {
     return bytes_sent;
 }
 
+// Send the contents of a file for TCP connections
 void send_file_contents(int sockfd, char* file_path) {
     char* file_contents = read_file(file_path);
     int len = strlen(file_contents);
@@ -76,7 +78,17 @@ void send_file_contents(int sockfd, char* file_path) {
     free(file_contents);
 }
 
-
+// Receive bytes for TCP
+int receive_bytes(int sockfd, char *buf, int len, int flags) {
+    ssize_t bytes_received = recv(sockfd, buf, len, flags);
+    if (bytes_received == -1) {
+        perror("recv()");
+        return EXIT_FAILURE;
+    } else if (bytes_received == 0) {
+        return EOF;
+    }
+    return bytes_received;
+}
 
 const char* get_value(char* file_path, char* key) {
     json_t *root;

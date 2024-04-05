@@ -40,7 +40,6 @@ void save_results(double time_one, double time_two) {
    }
    
    size_t n = strlen(buffer);
-
    write_contents_to_file(RESULT_FILE, buffer, n);
 }
 
@@ -48,7 +47,7 @@ void save_results(double time_one, double time_two) {
 void recv_config_file(int sockfd) {
     char* buffer = (char*)malloc(MAX_BUFFER_LEN);
 
-    int bytes_received = receive_packets(sockfd, buffer, MAX_BUFFER_LEN);
+    int bytes_received = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
     size_t buffer_size = strlen(buffer);
     
     write_contents_to_file(CONFIG_FILE, buffer, buffer_size);

@@ -10,19 +10,6 @@ int send_packets(int client_socket, char *buffer, int buffer_len) {
     return sent_bytes;
 }
 
-// Receive TCP packets
-int receive_packets(int sockfd, char *buffer, int buffer_len) {
-    int num_recieved = recv(sockfd, buffer, buffer_len, 0);
-    
-    if (num_recieved < 0) {
-        handle_error(sockfd, "recvfrom() failed");
-    } else if (num_recieved == 0) {
-        /* sender has closed connection */
-        return EOF;
-    } else {
-        return num_recieved; /* might not be full record! */
-    }
-} 
 
 // Binds socket
 void bind_socket(int sockfd, unsigned short server_port) {
