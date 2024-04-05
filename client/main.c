@@ -6,7 +6,6 @@ void send_file_contents(int sockfd, char* file_path) {
     char* file_contents = read_file(file_path);
     int len = strlen(file_contents);
     if (send_bytes(sockfd, file_contents, len, 0)) {
-      //  printf("Sending complete.\n");
     } else {
         handle_error(sockfd, "Send()");
     }
@@ -22,7 +21,6 @@ void receive_server_msg(int sockfd) {
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
     }
- //  printf("Server Message: %s\n", buffer);
     free(buffer);
 }
 
@@ -33,9 +31,12 @@ void tcp_connection(char* full_path, char* key, const char* server_address) {
         perror("Error! Invalid TCP_PREPROB_port_number");
         exit(EXIT_FAILURE);
     }
-
+    
+    printf("[client]: Establishing TCP Connection\n");
     int sockfd = establish_connection(server_address, port);
+    printf("[client]: Sending myconfig.json...\n");
     send_file_contents(sockfd, full_path);
+    printf("[client]: Config file sent!\n");
     receive_server_msg(sockfd);
 }
 
@@ -52,20 +53,15 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
     }
 
     // Send low entropy
-    printf("Sending first round of packets...\n");
+    printf("[client]: Sending first round of UDP packets...\n");
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
-    printf("Server wait time...\n");
+    // Wait
     wait(server_wait_time);             // Performs the wait time to make sure all the inital packets got there
-    printf("Measurement wait time...\n");
     wait(timer);
-    // Send high entropy packets
-    printf("Sending second round of packets...\n");
+    // Send high entropy
+    printf("[client]: Sending second round of UDP packets...\n");
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
-    printf("Server wait time..\n");
     wait(server_wait_time);
-
-    printf("Done\n");
-
 }
 
 // Probing Phase
@@ -115,28 +111,11 @@ int main(int argc, char**argv) {
      snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
 
      const char* server_addr = get_value(full_path, "server_ip");
-
-     time_t rawtime;
-     struct tm * timeinfo;
-  //   time (&rawtime);
-  //   timeinfo = localtime (&rawtime);
-
-   /*  printf("Current local time and date: %s minutes: %d seconds: %d\n", asctime (timeinfo), timeinfo->tm_min, timeinfo->tm_sec);
-     wait(5);
-     time (&rawtime);
-     timeinfo = localtime (&rawtime);
-     printf("Current local time and date: %s minutes: %d seconds: %d\n", asctime (timeinfo), timeinfo->tm_min, timeinfo->tm_sec);  */
-
-     unsigned int measurement_time = (unsigned int)atoi(get_value(full_path, "measurement_time"));
-     time (&rawtime);
-     timeinfo = localtime (&rawtime);
-
-     printf("Time at TCP Connection: %s\n", asctime (timeinfo));
+     
      tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
      
-     printf("Time at Probing Phase: %s\n", asctime (timeinfo));
      probing_phase(full_path, server_addr);                                // Probing Phase
- //   tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
+     tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
    
     free(full_path);
  
