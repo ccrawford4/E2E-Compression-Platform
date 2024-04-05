@@ -24,7 +24,6 @@ void write_file_contents(char* buffer, int len) {
     if (bytes_written < len) {
         perror("Failed to write full buffer to file");
     }
-    free(buffer);
     fclose(fp);
 
 }
@@ -61,6 +60,17 @@ void tcp_connection(char* full_path, char* key, const char* server_address, bool
         send_file_contents(sockfd, full_path);
         receive_server_msg(sockfd, pre_prob);
     } else {
+       /* if (listen(sockfd, 5) < 0) {
+            perror("listen() error listening");
+        } 
+        // TODO: replace with communal server_listen function
+        struct sockaddr_in addr;
+        int client_sockfd, addr_len = sizeof(addr);
+        client_sockfd = accept(sockfd, (struct sockaddr *) &addr, &addr_len);
+        if (client_sockfd < 0) {
+              close(client_sockfd);
+              handle_error(sockfd, "accept() error accepting connections");
+        }*/
         printf("[client]: Waiting for result file\n");
         receive_server_msg(sockfd, pre_prob);
     }
