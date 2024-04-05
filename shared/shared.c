@@ -55,6 +55,29 @@ char* read_file(char* file_path) {
     return buffer;
 }
 
+int send_bytes(int sockfd, char *buf, int len, int flags) {
+    ssize_t bytes_sent = send(sockfd, buf, len, flags);
+    if (bytes_sent == -1) {
+        perror("error sending tcp content");
+        return EXIT_FAILURE;
+    }
+    if (bytes_sent < len) {
+        perror("Error sending all the bytes for tcp");
+    }
+    return bytes_sent;
+}
+
+void send_file_contents(int sockfd, char* file_path) {
+    char* file_contents = read_file(file_path);
+    int len = strlen(file_contents);
+    if (send_bytes(sockfd, file_contents, len, 0) < 0) {
+        handle_error(sockfd, "send()");
+    }
+    free(file_contents);
+}
+
+
+
 const char* get_value(char* file_path, char* key) {
     json_t *root;
     json_error_t error;

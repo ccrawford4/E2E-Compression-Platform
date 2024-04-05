@@ -2,17 +2,6 @@
 #define MAX_BUFFER_LEN 500
 #define RESULT_FILE "result.txt"
 
-// Sends the file contents given a file path
-void send_file_contents(int sockfd, char* file_path) {
-    char* file_contents = read_file(file_path);
-    int len = strlen(file_contents);
-    if (send_bytes(sockfd, file_contents, len, 0)) {
-    } else {
-        handle_error(sockfd, "Send()");
-    }
-    free(file_contents);
-}
-
 // Receives messages from the server
 void receive_server_msg(int sockfd, bool pre_prob) {
     char *buffer = (char*)malloc(MAX_BUFFER_LEN);

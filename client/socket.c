@@ -75,7 +75,7 @@ int establish_connection(char* server_ip, unsigned short port) {
 // Receives bytes from the server (TCP)
 int receive_bytes(int sockfd, char *buf, int len, int flags) {
     ssize_t bytes_recieved = recv(sockfd, buf, len+10, flags);
-    printf("Bytes recieved: %d\n", bytes_recieved);
+    printf("Bytes recieved: %ld\n", bytes_recieved);
     if (bytes_recieved == -1) {
         perror("error recieving content");
         abort();
@@ -83,15 +83,6 @@ int receive_bytes(int sockfd, char *buf, int len, int flags) {
     return bytes_recieved;
  }
 
-// Sends bytes to the server (TCP)
-int send_bytes(int sockfd, char *buf, int len, int flags) {
-    ssize_t bytes_sent = send(sockfd, buf, len, flags);
-    if (bytes_sent == -1) {
-        perror("error sending content");
-        abort();
-    }
-    return bytes_sent;
-}
 
 // Sends UDP packets
 void send_udp_packets(int sockfd, const char* server_ip, int server_port, int packet_size, int num_packets, bool low_entropy) {
