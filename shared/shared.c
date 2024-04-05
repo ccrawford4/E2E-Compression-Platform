@@ -8,15 +8,14 @@ void handle_error(int sockfd, char* error_msg) {
     abort();
 }
 
-void write_contents_to_file(char* file_name, char* buffer, size_t buffer_size) {
+void write_contents_to_file(char* file_name, char* buffer, int len) {
     FILE* fp = fopen(file_name, "w");
     if (fp == NULL) {
         perror("Failed to open file");
         exit(EXIT_FAILURE);
     }
     
-    int len = strlen(buffer);
-    size_t bytes_written = fwrite(buffer, 1, buffer_size, fp);
+    size_t bytes_written = fwrite(buffer, 1, len, fp);
     if (bytes_written < len) {
         perror("Failed to write full buffer to file");
         exit(EXIT_FAILURE);

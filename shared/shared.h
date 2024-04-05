@@ -24,7 +24,7 @@ void wait(unsigned int count_down_time_in_secs);
 
 // File Parsing
 char* read_file(char* file_path);
-void write_contents_to_file(char* file_name, char* buffer, size_t buffer_size);
+void write_contents_to_file(char* file_name, char* buffer, int len);
 void send_file_contents(int sockfd, char* file_path);
 
 // Socket Programming

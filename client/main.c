@@ -9,7 +9,6 @@ void receive_server_msg(int sockfd, bool pre_prob) {
         perror("Error Allocating Memory");
         exit(EXIT_FAILURE);
     }
-    size_t buffer_size = sizeof(buffer);
     memset(buffer, 0, sizeof(buffer));
     int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
     if (bytes_recv == -1) {
@@ -18,8 +17,8 @@ void receive_server_msg(int sockfd, bool pre_prob) {
     if (pre_prob) {
         printf("[server]: %s\n", buffer);
     } else {
-        printf("buffer received: %s\n", buffer);
-        write_contents_to_file(RESULT_FILE, buffer, buffer_size);
+        int len = strlen(buffer);
+        write_contents_to_file(RESULT_FILE, buffer, len);
         printf("[client]: Received Results From Server!\n");
     }
 
@@ -40,17 +39,6 @@ void tcp_connection(char* full_path, char* key, const char* server_address, bool
         send_file_contents(sockfd, full_path);
         receive_server_msg(sockfd, pre_prob);
     } else {
-       /* if (listen(sockfd, 5) < 0) {
-            perror("listen() error listening");
-        } 
-        // TODO: replace with communal server_listen function
-        struct sockaddr_in addr;
-        int client_sockfd, addr_len = sizeof(addr);
-        client_sockfd = accept(sockfd, (struct sockaddr *) &addr, &addr_len);
-        if (client_sockfd < 0) {
-              close(client_sockfd);
-              handle_error(sockfd, "accept() error accepting connections");
-        }*/
         printf("[client]: Waiting for result file\n");
         receive_server_msg(sockfd, pre_prob);
     }
