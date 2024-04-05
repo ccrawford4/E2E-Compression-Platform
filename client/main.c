@@ -1,5 +1,6 @@
 #include "main.h"
 #define MAX_BUFFER_LEN 500
+#define RESULT_FILE "result.txt"
 
 // Sends the file contents given a file path
 void send_file_contents(int sockfd, char* file_path) {
@@ -12,8 +13,23 @@ void send_file_contents(int sockfd, char* file_path) {
     free(file_contents);
 }
 
+void write_file_contents(char* buffer, int len) {
+    FILE* fp = fopen(RESULT_FILE, "w");
+    if (fp == NULL) {
+        perror("Failed to open the file");
+        exit(EXIT_FAILURE);
+    }
+
+    size_t bytes_written = fwrite(buffer, 1, len, fp);
+    if (bytes_written < len) {
+        perror("Failed to write full buffer to file");
+    }
+    free(buffer);
+    fclose(fp);
+
+}
 // Receives messages from the server
-void receive_server_msg(int sockfd) {
+void receive_server_msg(int sockfd, bool pre_prob) {
     char *buffer = (char*)malloc(MAX_BUFFER_LEN);
     memset(buffer, 0, sizeof(buffer));
     int len = strlen(buffer);
@@ -21,24 +37,34 @@ void receive_server_msg(int sockfd) {
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
     }
+    if (pre_prob) {
+        printf("[server]: %s\n", buffer);
+    } else {
+        write_file_contents(buffer, len);
+        printf("[client]: Received Results From Server!\n");
+    }
+
     free(buffer);
 }
 
 // Establishes a TCP connection
-void tcp_connection(char* full_path, char* key, const char* server_address) {
+void tcp_connection(char* full_path, char* key, const char* server_address, bool pre_prob) {
     unsigned short port = (unsigned short)atoi(get_value(full_path, key));
     if (port == 0) {
         perror("Error! Invalid TCP_PREPROB_port_number");
         exit(EXIT_FAILURE);
     }
-    
     printf("[client]: Establishing TCP Connection\n");
     int sockfd = establish_connection(server_address, port);
-    printf("[client]: Sending myconfig.json...\n");
-    send_file_contents(sockfd, full_path);
-    printf("[client]: Config file sent!\n");
-    receive_server_msg(sockfd);
-}
+    if (pre_prob) {
+        printf("[client]: Sending myconfig.json...\n");
+        send_file_contents(sockfd, full_path);
+        receive_server_msg(sockfd, pre_prob);
+    } else {
+        printf("[client]: Waiting for result file\n");
+        receive_server_msg(sockfd, pre_prob);
+    }
+  }
 
 void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {
     unsigned int timer = (unsigned int)atoi(get_value(full_path, "measurement_time"));
@@ -61,7 +87,7 @@ void probe(char* full_path, int udp_socket, const char* server_address, int udp_
     // Send high entropy
     printf("[client]: Sending second round of UDP packets...\n");
     send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
-    wait(server_wait_time);
+    wait(timer);
 }
 
 // Probing Phase
@@ -112,10 +138,11 @@ int main(int argc, char**argv) {
 
      const char* server_addr = get_value(full_path, "server_ip");
      
-     tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr);    // Pre-Probing Phase TCP Connection
+     tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr, true);    // Pre-Probing Phase TCP Connection
      
-     probing_phase(full_path, server_addr);                                // Probing Phase
-     tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr);  // Post-Probing Phase TCP Connection
+     probing_phase(full_path, server_addr);// Probing Phase
+
+     tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr, false);  // Post-Probing Phase TCP Connection
    
     free(full_path);
  
