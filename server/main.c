@@ -9,7 +9,7 @@
 
 // Write the JSON contents to the config.json file
 void write_contents_to_file(char* file_name, char* buffer, size_t buffer_size) {
-    FILE* fp = fopen(file_name, "wb");
+    FILE* fp = fopen(file_name, "w");
     if (fp == NULL) {
         perror("Failed to open file");
         exit(EXIT_FAILURE);
@@ -35,7 +35,6 @@ bool calc_results(double time_one, double time_two) {
 void save_results(double time_one, double time_two) {
    double diff = abs(time_one - time_two);
    char* buffer = (char*)malloc(MAX_BUFFER_LEN);
-   size_t n = sizeof(buffer);
    if (buffer == NULL) {
         perror("Memory allocation failure");
         exit(EXIT_FAILURE);
@@ -44,17 +43,19 @@ void save_results(double time_one, double time_two) {
    bool found_compression = calc_results(time_one, time_two);
    int w;
    if (found_compression) {
-        w = snprintf(buffer, n, "Compression Detected!\n Time One: %f\tTime Two: %f\n", 
+        w = snprintf(buffer, MAX_BUFFER_LEN, "Compression Detected!\nTime One: %f\tTime Two: %f\n", 
         time_one, time_two);
    } else {
-        w = snprintf(buffer, n, "No Compression Detected!\n Time one: %f\tTime Two: %f\n",
+        w = snprintf(buffer, MAX_BUFFER_LEN, "No Compression Detected!\nTime one: %f\tTime Two: %f\n",
         time_one, time_two);
    }
 
-   if (w >= n) {
+   if (w > MAX_BUFFER_LEN) {
        perror("Buffer length exceeded!\n");
        exit(EXIT_FAILURE);
    }
+   
+   size_t n = strlen(buffer);
 
    write_contents_to_file(RESULT_FILE, buffer, n);
 }
@@ -77,10 +78,19 @@ void recv_config_file(int sockfd) {
 }
 
 void send_results(int sockfd) {
-    char* buffer = "hello"; 
+    char buffer[MAX_BUFFER_LEN]; 
     int n = strlen(buffer);
+
     // read the file contents into the buffer
-    
+    FILE *stream = fopen(RESULT_FILE, "r");
+    if (stream == NULL) {
+        perror("Failed to open the file");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+
+    int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
+    fclose(stream);
     int packets = send_packets(sockfd, buffer, n);
     if (packets != n) {
         perror("ERROR! Not all the packets were received");
@@ -237,7 +247,7 @@ int main(int argc, char**argv) {
         printf("ERROR! %d Is Not A Valid Port Number\n", post_prob_tcp_port);
         return EXIT_FAILURE;
     }
-
+    
     establish_tcp_connection(post_prob_tcp_port, false);
         
     return EXIT_SUCCESS;
