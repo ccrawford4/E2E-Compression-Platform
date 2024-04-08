@@ -2,12 +2,11 @@
 #include <math.h>
 
 #define MAX_BUFFER_LEN 1000
-#define MAX_LINE 1000
 #define R 0.100
 #define CONFIG_FILE "config.json"
 #define RESULT_FILE "result.txt"
 
-
+// Calculate if Compression was detected
 bool calc_results(double time_one, double time_two) {
     double diff = abs(time_one - time_two);
     if (diff > R) {
@@ -16,8 +15,8 @@ bool calc_results(double time_one, double time_two) {
     return false;
 }
 
+// Save the results inot a file
 void save_results(double time_one, double time_two) {
-   double diff = abs(time_one - time_two);
    char* buffer = (char*)malloc(MAX_BUFFER_LEN);
    if (buffer == NULL) {
         perror("Memory allocation failure");
@@ -60,6 +59,7 @@ void recv_config_file(int sockfd) {
     send_bytes(sockfd, server_msg, strlen(server_msg) + 1, 0);
 }
 
+// Sends the results to the client
 void send_results(int sockfd) {
     char buffer[MAX_BUFFER_LEN]; 
 
@@ -82,7 +82,7 @@ void send_results(int sockfd) {
     }
 }
 
-// Establishes a TCP Connection
+// Establishes a TCP Connection and based on the phase performs operations
 void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
     int tcp_socket = init_socket(server_port, SOCK_STREAM);
     int client_socket = server_listen(tcp_socket);    
@@ -94,7 +94,7 @@ void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
 }
 
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
-    char* buffer = (char*)malloc(1000); // Allocate buffer correctly
+    char* buffer = (char*)malloc(MAX_BUFFER_LEN); // Allocate buffer correctly
     socklen_t len = sizeof(cliaddr);
     int n;
 
@@ -109,7 +109,9 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
     struct timespec start_time, current_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     end_time = start_time; // Initialize end_time to start_time
-
+    
+    print_time(start_time); 
+    // Calculates the time it takes for the packet train to be received
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
         double elapsed = (current_time.tv_sec - start_time.tv_sec) + 
@@ -119,7 +121,7 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
             break;
         }
 
-        n = recvfrom(sockfd, buffer, 1000 - 1, 0, (struct sockaddr *)&cliaddr, &len); // Use correct buffer size
+        n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN - 1, 0, (struct sockaddr *)&cliaddr, &len);
         if (n > 0) {
             end_time = current_time; // Update end_time each time data is received
         }
@@ -167,6 +169,7 @@ void probing_phase() {
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "server_wait_time"));
     unsigned int client_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "measurement_time"));
+
     double time_one = calc_stream_time(server_wait_time, cliaddr, sockfd);
     wait(client_wait_time);
     double time_two = calc_stream_time(server_wait_time, cliaddr, sockfd);
@@ -196,7 +199,6 @@ int main(int argc, char**argv) {
     
     time (&rawtime);
     timeinfo = localtime (&rawtime);
-    printf("Current time before probing phase: %s\n", asctime (timeinfo));
     probing_phase();                               // Probing Phase
 
     unsigned int post_prob_tcp_port = (unsigned int) atoi(get_value(CONFIG_FILE, "TCP_POSTPROB_port_number"));
