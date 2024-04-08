@@ -100,34 +100,3 @@ int receive_bytes(int sockfd, char *buf, int len, int flags) {
     }
     return bytes_received;
 }
-
-const char* get_value(char* file_path, char* key) {
-    json_t *root;
-    json_error_t error;
-
-    const char* text = read_file(file_path);
-    root = json_loads(text, 0, &error);
-
-    if (!root) {
-        fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
-        exit(EXIT_FAILURE);
-    }
-    
-    if (!json_is_object(root)) {
-         fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
-         exit(EXIT_FAILURE);
-    }
-
-    json_t *data = json_object_get(root, key);
-
-    // TODO: if key is invalid -> return a valid key from hashmap object (to be created)
-    
-    if (!json_is_string(data)) {
-        fprintf(stderr, "error parsing key %s\n", key);
-        exit(EXIT_FAILURE);
-    }
-
-    const char* value = json_string_value(data);
-
-    return value;
-}
