@@ -90,7 +90,8 @@ void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
         recv_config_file(client_socket);
     } else {
        send_results(client_socket); 
-    }    
+    }   
+    close(tcp_socket);
 }
 
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {

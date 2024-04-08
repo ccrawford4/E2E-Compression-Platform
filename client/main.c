@@ -42,6 +42,7 @@ void tcp_connection(char* full_path, char* key, const char* server_address, bool
         printf("[client]: Waiting for result file\n");
         receive_server_msg(sockfd, pre_prob);
     }
+    close(sockfd);
   }
 
 void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {
