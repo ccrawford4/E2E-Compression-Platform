@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <arpa/inet.h>
+#include "../shared/shared.h"
 
 #define RANDOM_FILE "../shared/random_file"
 
@@ -101,6 +102,9 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
         exit(EXIT_FAILURE);
     }
     
+    struct timespec current_time;
+    clock_gettime(CLOCK_REALTIME, &current_time);
+    print_time(current_time);
 
     for (int i = 0; i < num_packets; i++) {
         // first two bytes should = 0000 0000
