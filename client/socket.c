@@ -40,7 +40,13 @@ int establish_connection(char* server_ip, unsigned short port) {
      perror("socket()");
      exit(EXIT_FAILURE);
    }
-
+   
+   int optval = 1;
+   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
+        perror("Error setting SO_REUSEADDR");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
     struct sockaddr_in local_addr;
     memset(&local_addr, 0, sizeof(local_addr));
     local_addr.sin_family = AF_INET;
@@ -51,6 +57,7 @@ int establish_connection(char* server_ip, unsigned short port) {
         perror("bind()");
         exit(EXIT_FAILURE);
     }
+     
 
    struct sockaddr_in sin;
    struct hostent *host = gethostbyname(server_ip);
