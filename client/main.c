@@ -110,7 +110,7 @@ int main(int argc, char**argv) {
     
      tcp_connection(full_path, tcp_postprob_port, server_addr, false);        // Post-Probing Phase TCP Connection
    
-    free(full_path);
+     free(full_path);
 
     return EXIT_SUCCESS;
  

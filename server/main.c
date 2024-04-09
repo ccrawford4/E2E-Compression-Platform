@@ -85,6 +85,7 @@ void send_results(int sockfd) {
         close(sockfd);
         exit(EXIT_FAILURE);
     }
+    close(sockfd);
 }
 
 // Establishes a TCP Connection and based on the phase performs operations
@@ -96,7 +97,6 @@ void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
     } else {
        send_results(client_socket); 
     }   
-    close(tcp_socket);
 }
 
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
