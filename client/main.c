@@ -96,6 +96,7 @@ void probing_phase(char* full_path, const char* server_address) {
     }
 
     probe(full_path, udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size);
+    close(udp_socket);
 }
 
 int main(int argc, char**argv) {
