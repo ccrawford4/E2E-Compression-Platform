@@ -16,7 +16,8 @@
 #define PATH_PREFIX "../shared/" 
 
 // JSON Parsing
-const char* get_value(char* file_path, char* key);
+const char* get_value(char* file_path, char *key);
+void handle_key_error(int ret_val, char* key, char* file_name);
 
 // MISC
 void handle_error(int sockfd, char* error_msg);

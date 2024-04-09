@@ -26,12 +26,7 @@ void receive_server_msg(int sockfd, bool pre_prob) {
 }
 
 // Establishes a TCP connection
-void tcp_connection(char* full_path, char* key, const char* server_address, bool pre_prob) {
-    unsigned short port = (unsigned short)atoi(get_value(full_path, key));
-    if (port == 0) {
-        perror("Error! Invalid TCP_PREPROB_port_number");
-        exit(EXIT_FAILURE);
-    }
+void tcp_connection(char* full_path, unsigned int port, const char* server_address, bool pre_prob) {
     printf("[client]: Establishing TCP Connection\n");
     int sockfd = establish_connection(server_address, port);
     if (pre_prob) {
@@ -43,60 +38,27 @@ void tcp_connection(char* full_path, char* key, const char* server_address, bool
         receive_server_msg(sockfd, pre_prob);
     }
     close(sockfd);
-  }
+ }
 
-void probe(char* full_path, int udp_socket, const char* server_address, int udp_dest_port, int udp_payload_size, int udp_packet_train_size) {
-    unsigned int timer = (unsigned int)atoi(get_value(full_path, "measurement_time"));
-    if (timer == 0) {
-        perror("ERROR! Invalid measurement_time");
-        exit(EXIT_FAILURE);
-    }
-    unsigned int server_wait_time = (unsigned int)atoi(get_value(full_path, "server_wait_time"));
-    if (server_wait_time == 0) {
-        perror("ERROR! Invalid server wait time");
-        exit(EXIT_FAILURE);
-    }
+// Probing Phase
+void probing_phase(const char* server_addr, unsigned int server_wait_time, unsigned int measurement_time,
+int dst_port, int src_port, int payload_size, int train_size) {
+    int sockfd = init_udp_socket(src_port);
 
     // Send low entropy
     printf("[client]: Sending first round of UDP packets...\n");
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, true);
+    send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, true);
+
     // Wait
-    wait(server_wait_time);             // Performs the wait time to make sure all the inital packets got there
-    wait(timer);
+    wait(server_wait_time);
+    wait(measurement_time);
+
     // Send high entropy
     printf("[client]: Sending second round of UDP packets...\n");
-    send_udp_packets(udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size, false);
-    wait(timer);
-}
+    send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, false);
+    wait(measurement_time);
 
-// Probing Phase
-void probing_phase(char* full_path, const char* server_address) {
-    int udp_dest_port = atoi(get_value(full_path, "UDP_dest_port_number"));
-    if (udp_dest_port == 0) {
-        perror("ERROR! Invalid UDP_src_port_number");
-        exit(EXIT_FAILURE);
-    }
-    int udp_src_port = atoi(get_value(full_path, "UDP_src_port_number"));
-
-    int udp_socket = init_udp_socket(udp_src_port);
-    char* udp_payload_string = (char*)get_value(full_path, "UDP_payload_size");
-    int len = strlen(udp_payload_string);
-    *(udp_payload_string + len - 1) = '\0';         // Remove the 'B' from the payload_size
-    
-    int udp_payload_size = atoi(udp_payload_string);
-    if (udp_payload_size == 0) {
-        perror("Error! Invalid UDP_payload_size");
-        exit(EXIT_FAILURE);
-    }
-
-    int udp_packet_train_size = atoi(get_value(full_path, "UDP_packet_train_size"));
-    if (udp_packet_train_size == 0) {
-        perror("ERROR! Invalid UDP_packet_train_size");
-        exit(EXIT_FAILURE);
-    }
-
-    probe(full_path, udp_socket, server_address, udp_dest_port, udp_payload_size, udp_packet_train_size);
-    close(udp_socket);
+    close(sockfd);
 }
 
 int main(int argc, char**argv) {
@@ -117,13 +79,39 @@ int main(int argc, char**argv) {
      snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
 
      const char* server_addr = get_value(full_path, "server_ip");
-     
-     tcp_connection(full_path, "TCP_PREPROB_port_number", server_addr, true);    // Pre-Probing Phase TCP Connection
-     
-     probing_phase(full_path, server_addr);// Probing Phase
+     if (!strcmp(server_addr, "ERROR")) {
+        printf("ERROR! You must enter a server IP address in the %s file\n", argv[1]);
+        return EXIT_FAILURE;
+     }
 
-     tcp_connection(full_path, "TCP_POSTPROB_port_number", server_addr, false);  // Post-Probing Phase TCP Connection
+     unsigned int tcp_preprob_port = (unsigned int)atoi(get_value(full_path, "TCP_PREPROB_port_number"));
+     handle_key_error(tcp_preprob_port, "TCP_PREPROB_port_number", full_path);
+     unsigned int tcp_postprob_port = (unsigned int)atoi(get_value(full_path, "TCP_POSTPROB_port_number"));
+     handle_key_error(tcp_postprob_port, "TCP_POSTPROB_port_number", full_path); 
+     unsigned int server_wait_time = (unsigned int)atoi(get_value(full_path, "server_wait_time"));
+     handle_key_error(server_wait_time, "server_wait_time", full_path);
+     unsigned int measurement_time = (unsigned int)atoi(get_value(full_path, "measurement_time"));
+     handle_key_error(measurement_time, "measurement_time", full_path); 
+     unsigned int dst_port = (unsigned int)atoi(get_value(full_path, "UDP_dest_port_number"));
+     handle_key_error(dst_port, "UDP_dest_port_number", full_path);
+     unsigned int src_port = (unsigned int)atoi(get_value(full_path, "UDP_src_port_number"));
+     handle_key_error(src_port, "UDP_src_port_number", full_path);
+     char* udp_payload_string = (char*)get_value(full_path, "UDP_payload_size");
+     int len = strlen(udp_payload_string);
+     *(udp_payload_string + len - 1) = '\0';                                  // Remove the 'B' from the payload_size    
+     unsigned int payload_size = (unsigned int)atoi(udp_payload_string);
+     handle_key_error(payload_size, "UDP_payload_size", full_path);
+     unsigned int train_size = (unsigned int)atoi(get_value(full_path, "UDP_packet_train_size"));
+     handle_key_error(train_size, "UDP_packet_train_size", full_path);
+
+     tcp_connection(full_path, tcp_preprob_port, server_addr, true);         // Pre-Probing Phase TCP Connection
+     
+     probing_phase(server_addr, server_wait_time, measurement_time, dst_port, src_port, payload_size, train_size);    // Probing Phase
+    
+     tcp_connection(full_path, tcp_postprob_port, server_addr, false);        // Post-Probing Phase TCP Connection
    
     free(full_path);
+
+    return EXIT_SUCCESS;
  
 }

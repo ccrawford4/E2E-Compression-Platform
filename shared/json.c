@@ -21,6 +21,15 @@ item default_items[NUM_ITEMS] = {
     {"server_wait_time", "5"}
 };
 
+void handle_key_error(int ret_val, char* key, char* file_name) {
+    if (key == 0) {
+        printf("ERROR! Invalid Value For Said Key: %s\n", key);
+        printf("See file %s\n", file_name);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 // Return the default value if the value doesn't in the JSON
 const char* get_default(char* key) {
     for (int i = 0; i < NUM_ITEMS; i++) {
