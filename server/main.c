@@ -40,11 +40,16 @@ void save_results(double time_one, double time_two) {
    
    size_t n = strlen(buffer);
    write_contents_to_file(RESULT_FILE, buffer, n);
+   free (buffer);
 }
 
 // Prints out JSON contents from Pre-Probing TCP Connection Phase
 void recv_config_file(int sockfd) {
     char* buffer = (char*)malloc(MAX_BUFFER_LEN);
+    if (buffer == NULL) {
+        perror("Memory allocation failure");
+        exit(EXIT_FAILURE);
+    }
 
     int bytes_received = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
     size_t buffer_size = strlen(buffer);
