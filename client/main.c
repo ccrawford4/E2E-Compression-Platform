@@ -15,7 +15,7 @@ void receive_server_msg(int sockfd, bool pre_prob) {
         handle_error(sockfd, "Recv()");
     }
     if (pre_prob) {
-        printf("[server]: %s\n", buffer);
+       printf("[server]: %s\n", buffer);
     } else {
         int len = strlen(buffer);
         write_contents_to_file(RESULT_FILE, buffer, len);
@@ -33,6 +33,7 @@ void tcp_connection(char* full_path, unsigned int port, const char* server_addre
         printf("[client]: Sending myconfig.json...\n");
         send_file_contents(sockfd, full_path);
         receive_server_msg(sockfd, pre_prob);
+        wait(1);
     } else {
         printf("[client]: Waiting for result file\n");
         receive_server_msg(sockfd, pre_prob);
