@@ -6,6 +6,10 @@
 #define CONFIG_FILE "config.json"
 #define RESULT_FILE "result.txt"
 
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
 // Calculate if Compression was detected
 bool calc_results(double time_one, double time_two) {
     double diff = abs(time_one - time_two);
@@ -43,7 +47,7 @@ void save_results(double time_one, double time_two) {
    free (buffer);
 }
 
-// Prints out JSON contents from Pre-Probing TCP Connection Phase
+// Receives and saves the JSON contents from Pre-Probing TCP Connection Phase
 void recv_config_file(int sockfd) {
     char* buffer = (char*)malloc(MAX_BUFFER_LEN);
     if (buffer == NULL) {
@@ -59,9 +63,6 @@ void recv_config_file(int sockfd) {
     if (bytes_received < 0) {
         handle_error(sockfd, "bytes_recieved");
     }
-
-    char* server_msg = "Config File Received!";
-    send_bytes(sockfd, server_msg, strlen(server_msg) + 1, 0);
 }
 
 // Sends the results to the client
@@ -77,30 +78,40 @@ void send_results(int sockfd) {
     }
 
     int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
-    fclose(stream);
     int n = strlen(buffer);
+
     int packets = send_bytes(sockfd, buffer, n, 0);
     if (packets != n) {
         perror("ERROR! Not all the packets were received");
         close(sockfd);
         exit(EXIT_FAILURE);
     }
+
+    fclose(stream);
     close(sockfd);
 }
 
 // Establishes a TCP Connection and based on the phase performs operations
 void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
     int tcp_socket = init_socket(server_port, SOCK_STREAM);
-    int client_socket = server_listen(tcp_socket);    
+    int client_socket = server_listen(tcp_socket);   
+
     if (pre_prob) {
         recv_config_file(client_socket);
     } else {
        send_results(client_socket); 
     }   
+
+    close(tcp_socket);
+    close(client_socket);
 }
 
 double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliaddr, int sockfd) {
     char* buffer = (char*)malloc(MAX_BUFFER_LEN); // Allocate buffer correctly
+    if (buffer == NULL) {
+        handle_error(sockfd, "Memory allocation failure");
+    }
+
     socklen_t len = sizeof(cliaddr);
     int n;
 
@@ -116,7 +127,10 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     end_time = start_time; // Initialize end_time to start_time
     
-    print_time(start_time); 
+    #if DEBUG
+     print_time(start_time); 
+    #endif
+
     // Calculates the time it takes for the packet train to be received
     while (true) {
         clock_gettime(CLOCK_MONOTONIC, &current_time);
@@ -128,6 +142,10 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
         }
 
         n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN - 1, 0, (struct sockaddr *)&cliaddr, &len);
+        if (n == -1) {
+            handle_error(sockfd, "recvfrom()");
+        }
+
         if (n > 0) {
             end_time = current_time; // Update end_time each time data is received
         }
@@ -146,7 +164,6 @@ void probing_phase() {
     unsigned int udp_port = (unsigned int)atoi(get_value(CONFIG_FILE, "UDP_dest_port_number"));
     if (udp_port == 0) {
         handle_error(udp_port, "Invalid UDP_dest_port_number");
-        exit(EXIT_FAILURE);
     }
 
     int sockfd;
