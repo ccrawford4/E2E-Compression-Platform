@@ -142,10 +142,6 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
         }
 
         n = recvfrom(sockfd, buffer, MAX_BUFFER_LEN - 1, 0, (struct sockaddr *)&cliaddr, &len);
-        if (n == -1) {
-            handle_error(sockfd, "recvfrom()");
-        }
-
         if (n > 0) {
             end_time = current_time; // Update end_time each time data is received
         }
