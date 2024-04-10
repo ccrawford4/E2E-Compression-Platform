@@ -1,9 +1,15 @@
 #include "main.h"
+#include <arpa/inet.h>
+
 #define MAX_BUFFER_LEN 500
 #define RESULT_FILE "result.txt"
 
-// Receives messages from the server
-void receive_server_msg(int sockfd, bool pre_prob) {
+#ifndef DEBUG
+#define DEBUG 0
+#endif
+
+// Receives congestion results from the server
+void receive_results(int sockfd) {
     char *buffer = (char*)malloc(MAX_BUFFER_LEN);
     if (buffer == NULL) {
         perror("Error Allocating Memory");
@@ -14,48 +20,66 @@ void receive_server_msg(int sockfd, bool pre_prob) {
     if (bytes_recv == -1) {
         handle_error(sockfd, "Recv()");
     }
-    if (pre_prob) {
-       printf("[server]: %s\n", buffer);
-    } else {
-        int len = strlen(buffer);
-        write_contents_to_file(RESULT_FILE, buffer, len);
-        printf("[client]: Received Results From Server!\n");
-    }
+    int len = strlen(buffer);
+    write_contents_to_file(RESULT_FILE, buffer, len);
+
+    #if DEBUG
+      printf("[client]: Received Results From Server!\n");
+    #endif
 
     free(buffer);
 }
 
 // Establishes a TCP connection
 void tcp_connection(char* full_path, unsigned int port, const char* server_address, bool pre_prob) {
-    printf("[client]: Establishing TCP Connection\n");
+    #if DEBUG
+      printf("[client]: Establishing TCP Connection\n");
+    #endif 
     int sockfd = establish_connection(server_address, port);
     if (pre_prob) {
-        printf("[client]: Sending myconfig.json...\n");
+        #if DEBUG
+          printf("[client]: Sending myconfig.json...\n");
+        #endif
         send_file_contents(sockfd, full_path);
-        receive_server_msg(sockfd, pre_prob);
         wait(1);
     } else {
+        #if DEBUG
         printf("[client]: Waiting for result file\n");
-        receive_server_msg(sockfd, pre_prob);
+        #endif
+        receive_results(sockfd);
     }
     close(sockfd);
  }
 
 // Probing Phase
-void probing_phase(const char* server_addr, unsigned int server_wait_time, unsigned int measurement_time,
+void probing_phase(const char* server_ip, unsigned int server_wait_time, unsigned int measurement_time,
 int dst_port, int src_port, int payload_size, int train_size) {
-    int sockfd = init_udp_socket(src_port);
+    int sockfd = init_socket(src_port, SOCK_DGRAM); // Creates a UDP socket
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(dst_port);
+
+    if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
+        handle_error(sockfd, "inet_pton()");
+    }
+    
+     #if DEBUG
+     printf("[client]: Sending first round of UDP packets...\n");
+     #endif
 
     // Send low entropy
-    printf("[client]: Sending first round of UDP packets...\n");
     send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, true);
 
     // Wait
     wait(server_wait_time);
     wait(measurement_time);
+    
+    #if DEBUG
+    printf("[client]: Sending second round of UDP packets...\n");
+    #endif
 
     // Send high entropy
-    printf("[client]: Sending second round of UDP packets...\n");
     send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, false);
     wait(measurement_time);
 
@@ -79,8 +103,8 @@ int main(int argc, char**argv) {
     }
      snprintf(full_path, size, "%s%s", PATH_PREFIX, file_name);
 
-     const char* server_addr = get_value(full_path, "server_ip");
-     if (!strcmp(server_addr, "ERROR")) {
+     const char* server_ip = get_value(full_path, "server_ip");
+     if (!strcmp(server_ip, "ERROR")) {
         printf("ERROR! You must enter a server IP address in the %s file\n", argv[1]);
         return EXIT_FAILURE;
      }
@@ -105,11 +129,11 @@ int main(int argc, char**argv) {
      unsigned int train_size = (unsigned int)atoi(get_value(full_path, "UDP_packet_train_size"));
      handle_key_error(train_size, "UDP_packet_train_size", full_path);
 
-     tcp_connection(full_path, tcp_preprob_port, server_addr, true);         // Pre-Probing Phase TCP Connection
+     tcp_connection(full_path, tcp_preprob_port, server_ip, true);         // Pre-Probing Phase TCP Connection
      
-     probing_phase(server_addr, server_wait_time, measurement_time, dst_port, src_port, payload_size, train_size);    // Probing Phase
+     probing_phase(server_ip, server_wait_time, measurement_time, dst_port, src_port, payload_size, train_size);    // Probing Phase
     
-     tcp_connection(full_path, tcp_postprob_port, server_addr, false);        // Post-Probing Phase TCP Connection
+     tcp_connection(full_path, tcp_postprob_port, server_ip, false);        // Post-Probing Phase TCP Connection
    
      free(full_path);
 

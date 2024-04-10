@@ -17,7 +17,7 @@ void print_time(struct timespec current_time) {
 void handle_error(int sockfd, char* error_msg) {
     perror(error_msg);
     close(sockfd);
-    abort();
+    exit(EXIT_FAILURE);
 }
 
 void write_contents_to_file(char* file_name, char* buffer, int len) {

@@ -10,60 +10,39 @@
 
 #define RANDOM_FILE "../shared/random_file"
 
-// Creates and returns a valid UDP socket
-int init_udp_socket(unsigned short src_port) {
-    struct sockaddr_in client_addr;
+int init_socket(unsigned short port, int type) {
     int sockfd;
-
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("Could not create UDP socket");
-        abort();
+    struct sockaddr_in addr;
+    if ((sockfd = socket(AF_INET, type, 0)) < 0) {
+        perror("socket()");
+        exit(EXIT_FAILURE);
     }
-    memset(&client_addr, 0, sizeof(client_addr));
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = INADDR_ANY;
 
-    client_addr.sin_family = AF_INET;
-    client_addr.sin_port = htons(src_port);
-    client_addr.sin_addr.s_addr = INADDR_ANY;
+    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        handle_error(sockfd, "bind()");
+    }
 
-    if (bind(sockfd, (struct sockaddr *)&client_addr, sizeof(client_addr)) < 0) {
-        perror("bind()");
-        abort();
+    int optval = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
+        handle_error(sockfd, "setsockopt()");
     }
 
     return sockfd;
 }
 
+
 // Establishes a TCP connection given the server's IP address and port number
 int establish_connection(char* server_ip, unsigned short port) {
-   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-   if (sockfd < 0) {
-     perror("socket()");
-     exit(EXIT_FAILURE);
-   }
-   
-   int optval = 1;
-   if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
-        perror("Error setting SO_REUSEADDR");
-        close(sockfd);
-        exit(EXIT_FAILURE);
-    }
-    struct sockaddr_in local_addr;
-    memset(&local_addr, 0, sizeof(local_addr));
-    local_addr.sin_family = AF_INET;
-    local_addr.sin_addr.s_addr = INADDR_ANY;
-    local_addr.sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr *)&local_addr, sizeof(local_addr)) < 0) {
-        perror("bind()");
-        exit(EXIT_FAILURE);
-    }
+   int sockfd = init_socket(port, SOCK_STREAM);
      
-
    struct sockaddr_in sin;
    struct hostent *host = gethostbyname(server_ip);
    if (host == NULL) {
-        perror("Error resolving host");
-        exit(EXIT_FAILURE);
+        handle_error(sockfd, "Error resolving host");
    }
 
    in_addr_t server_addr = *(in_addr_t *) host->h_addr_list[0];
@@ -83,18 +62,7 @@ int establish_connection(char* server_ip, unsigned short port) {
 
 
 // Sends UDP packets
-void send_udp_packets(int sockfd, const char* server_ip, int server_port, int packet_size, int num_packets, bool low_entropy) {
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(server_port);
-    
-    // Converts the IP address from text to binary form
-    if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
-        perror("inet_pton()\n");
-        abort();
-    }
-
+void send_udp_packets(int sockfd, struct sockaddr_in server_addr, int server_port, int packet_size, int num_packets, bool low_entropy) {
     char *payload = (char*)malloc(packet_size);
     if (payload == NULL) {
         perror("Memory allocation failed\n");
@@ -109,14 +77,8 @@ void send_udp_packets(int sockfd, const char* server_ip, int server_port, int pa
         exit(EXIT_FAILURE);
     }
     
-    struct timespec current_time;
-    clock_gettime(CLOCK_REALTIME, &current_time);
-    print_time(current_time);
-
+    // Send the packets
     for (int i = 0; i < num_packets; i++) {
-        // first two bytes should = 0000 0000
-        // for part one doesn't matter as much
-
         if (!low_entropy) {
             fseek(fp, 0, SEEK_SET);
             size_t bytes_read = fread(payload, 1, packet_size, fp);
