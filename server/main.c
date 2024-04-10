@@ -160,38 +160,19 @@ double calc_stream_time(unsigned int server_wait_time, struct sockaddr_in cliadd
 }
 
 // Probing Phase -> receive UDP packets from the sender
-void probing_phase() { 
-    unsigned int udp_port = (unsigned int)atoi(get_value(CONFIG_FILE, "UDP_dest_port_number"));
-    if (udp_port == 0) {
-        handle_error(udp_port, "Invalid UDP_dest_port_number");
-    }
-
-    int sockfd;
-    char* buffer = (char*)malloc(1000);
-    if (buffer == NULL) {
-        perror("Memory Allocation Failed");
-        exit(EXIT_FAILURE);
-    }
-    
-    struct sockaddr_in serveraddr, cliaddr;
-
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket()");
-        exit(EXIT_FAILURE);
-    }
-
-    serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = INADDR_ANY;
-    serveraddr.sin_port = htons(udp_port);
-
-    if (bind(sockfd, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
-        perror("bind()");
-        exit(EXIT_FAILURE);
-    }
+void probing_phase(unsigned int port) {     
+    struct sockaddr_in cliaddr;
+    int sockfd = init_socket(port, SOCK_DGRAM);
 
     int n;
     unsigned int server_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "server_wait_time"));
+    if (server_wait_time == 0) {
+       handle_key_error(server_wait_time, "server_wait_time", CONFIG_FILE); 
+    }
     unsigned int client_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "measurement_time"));
+    if (client_wait_time == 0) {
+       handle_key_error(client_wait_time, "measurement_time", CONFIG_FILE);
+    }
 
     double time_one = calc_stream_time(server_wait_time, cliaddr, sockfd);
     wait(client_wait_time);
@@ -213,16 +194,14 @@ int main(int argc, char**argv) {
         printf("ERROR! %s Is Not A Valid Port Number\n", argv[1]);
         return EXIT_FAILURE;
     }
-
-    
-    time_t rawtime;
-    struct tm * timeinfo;
-
     establish_tcp_connection(server_port, true);         // Pre-Probing TCP Phase Connection
-    
-    time (&rawtime);
-    timeinfo = localtime (&rawtime);
-    probing_phase();                               // Probing Phase
+
+    unsigned int udp_port = (unsigned int) atoi(get_value(CONFIG_FILE, "UDP_dest_port_number"));
+    if (udp_port == 0) {
+        handle_key_error(udp_port, "UDP_dest_port_number", CONFIG_FILE);
+    }
+
+    probing_phase(udp_port);                                     // Probing Phase
 
     unsigned int post_prob_tcp_port = (unsigned int) atoi(get_value(CONFIG_FILE, "TCP_POSTPROB_port_number"));
     if (post_prob_tcp_port == 0) {

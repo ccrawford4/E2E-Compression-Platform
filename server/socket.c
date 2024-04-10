@@ -41,7 +41,6 @@ int init_socket(unsigned int port_number, int type) {
     int sockfd = socket(AF_INET, type, 0);
     if (sockfd == -1) {
         handle_error(sockfd, "socket()");
-        return EXIT_FAILURE;
     }
     bind_socket(sockfd, port_number);
     return sockfd;
