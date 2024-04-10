@@ -41,7 +41,7 @@ void tcp_connection(char* full_path, unsigned int port, const char* server_addre
           printf("[client]: Sending myconfig.json...\n");
         #endif
         send_file_contents(sockfd, full_path);
-        wait(1);
+        wait(5);
     } else {
         #if DEBUG
         printf("[client]: Waiting for result file\n");
