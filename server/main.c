@@ -68,27 +68,27 @@ void recv_config_file(int sockfd) {
 
 // Sends the results to the client
 void send_results(int sockfd) {
-   char buffer[MAX_BUFFER_LEN];
+  char buffer[MAX_BUFFER_LEN];
 
-   // read the file contents into the buffer
-    FILE *stream = fopen(RESULT_FILE, "r");
-    if (stream == NULL) {
-        perror("Failed to open the file");
-        close(sockfd);
-        exit(EXIT_FAILURE);
-    }
+  // read the file contents into the buffer
+  FILE *stream = fopen(RESULT_FILE, "r");
+  if (stream == NULL) {
+    perror("Failed to open the file");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
 
-    int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
-    int n = strlen(buffer);
+  int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
+  int n = strlen(buffer);
 
-    int packets = send_bytes(sockfd, buffer, n, 0);
-    if (packets != n) {
-        perror("ERROR! Not all the packets were received");
-        close(sockfd);
-        exit(EXIT_FAILURE);
-    }
+  int packets = send_bytes(sockfd, buffer, n, 0);
+  if (packets != n) {
+    perror("ERROR! Not all the packets were received");
+    close(sockfd);
+    exit(EXIT_FAILURE);
+  }
 
-    fclose(stream);
+  fclose(stream);
 }
 
 // Establishes a TCP Connection and based on the phase performs operations
@@ -160,11 +160,12 @@ double calc_stream_time(unsigned int server_wait_time,
 }
 
 // Probing Phase -> receive UDP packets from the sender
-void probing_phase(unsigned int port, unsigned int server_wait_time, unsigned int client_wait_time) {     
-    struct sockaddr_in cliaddr;
-    int sockfd = init_socket(port, SOCK_DGRAM);
+void probing_phase(unsigned int port, unsigned int server_wait_time,
+                   unsigned int client_wait_time) {
+  struct sockaddr_in cliaddr;
+  int sockfd = init_socket(port, SOCK_DGRAM);
 
-    int n;
+  int n;
 
   double time_one = calc_stream_time(server_wait_time, cliaddr, sockfd);
   wait(client_wait_time);
@@ -180,28 +181,34 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-    unsigned int server_port = (unsigned int) atoi(argv[1]);
-    if (server_port == 0) {
-        printf("ERROR! %s Is Not A Valid Port Number\n", argv[1]);
-        return EXIT_FAILURE;
-    }
-    establish_tcp_connection(server_port, true);                         // Pre-Probing TCP Phase Connection
+  unsigned int server_port = (unsigned int)atoi(argv[1]);
+  if (server_port == 0) {
+    printf("ERROR! %s Is Not A Valid Port Number\n", argv[1]);
+    return EXIT_FAILURE;
+  }
+  establish_tcp_connection(server_port,
+                           true); // Pre-Probing TCP Phase Connection
 
-    // Get the values from the JSON
-    unsigned int udp_port = (unsigned int) atoi(get_value(CONFIG_FILE, "UDP_dest_port_number"));
-    unsigned int server_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "server_wait_time"));
-    unsigned int client_wait_time = (unsigned int)atoi(get_value(CONFIG_FILE, "measurement_time"));
-    unsigned int post_prob_tcp_port = (unsigned int)atoi(get_value(CONFIG_FILE, "TCP_POSTPROB_port_number"));
+  // Get the values from the JSON
+  unsigned int udp_port =
+      (unsigned int)atoi(get_value(CONFIG_FILE, "UDP_dest_port_number"));
+  unsigned int server_wait_time =
+      (unsigned int)atoi(get_value(CONFIG_FILE, "server_wait_time"));
+  unsigned int client_wait_time =
+      (unsigned int)atoi(get_value(CONFIG_FILE, "measurement_time"));
+  unsigned int post_prob_tcp_port =
+      (unsigned int)atoi(get_value(CONFIG_FILE, "TCP_POSTPROB_port_number"));
 
-    // Handle errors if the values in the JSON are improperly configured
-    handle_key_error(udp_port, "UDP_dest_port_number", CONFIG_FILE);
-    handle_key_error(server_wait_time, "server_wait_time", CONFIG_FILE);
-    handle_key_error(client_wait_time, "measurement_time", CONFIG_FILE);
-    handle_key_error(post_prob_tcp_port, "TCP_POSTPROB_port_number", CONFIG_FILE);
+  // Handle errors if the values in the JSON are improperly configured
+  handle_key_error(udp_port, "UDP_dest_port_number", CONFIG_FILE);
+  handle_key_error(server_wait_time, "server_wait_time", CONFIG_FILE);
+  handle_key_error(client_wait_time, "measurement_time", CONFIG_FILE);
+  handle_key_error(post_prob_tcp_port, "TCP_POSTPROB_port_number", CONFIG_FILE);
 
-    probing_phase(udp_port, server_wait_time, client_wait_time);         // Probing Phase
-    
-    establish_tcp_connection(post_prob_tcp_port, false);                // Post-Prob TCP Phase connection
-        
-    return EXIT_SUCCESS;
+  probing_phase(udp_port, server_wait_time, client_wait_time); // Probing Phase
+
+  establish_tcp_connection(post_prob_tcp_port,
+                           false); // Post-Prob TCP Phase connection
+
+  return EXIT_SUCCESS;
 }
