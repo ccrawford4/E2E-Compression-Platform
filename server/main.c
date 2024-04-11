@@ -40,13 +40,24 @@ void recv_config_file(int sockfd) {
   if (bytes_received < 0) {
     handle_error(sockfd, "bytes_recieved");
   }
+  free(buffer);
 }
 
 // Sends the results to the client
 void send_results(int sockfd) {
-  char buffer = compression_flag ? 1 : 0;          // 1 for true and 0 for false
+  char* buffer = (char*)malloc(MAX_BUFFER_LEN);
+  if (buffer == NULL) {
+        perror("Memory allocation failure");
+        exit(EXIT_FAILURE);
+  }
+
+  if (compression_flag) {
+       buffer = "No Compression Detected!";
+  } else {
+       buffer = "Compression Detected";
+  }
   int n = sizeof(buffer);
-  ssize_t packets = send(sockfd, &buffer, sizeof(buffer), 0);
+  ssize_t packets = send(sockfd, buffer, sizeof(buffer), 0);
 
   if (packets != n) {
     perror("ERROR! Not all the packets were received");

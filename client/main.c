@@ -4,26 +4,23 @@
 #define RESULT_FILE "result.txt"
 
 #ifndef DEBUG
-#define DEBUG 0
+#define DEBUG 1
 #endif
 
 // Receives congestion results from the server
 void receive_results(int sockfd) {
-  char buffer;
+  char* buffer = (char*)malloc(MAX_BUFFER_LEN);
   ssize_t bytes_recv = recv(sockfd, &buffer, sizeof(buffer), 0);
   if (bytes_recv > 0) {
-    int flag = buffer;
-    if (flag) {
-        printf("Compression Detected!\n");
-    } else {
-        printf("No Compression Detected!\n");
-    }
+      printf("%s", buffer);
   }
 
 #if DEBUG
+  printf("Buffer: %s\n", buffer);
   printf("[client]: Received Results From Server!\n");
 #endif
 
+  free(buffer);
 }
 
 // Establishes a TCP connection
