@@ -4,7 +4,7 @@
 #define RESULT_FILE "result.txt"
 
 #ifndef DEBUG
-#define DEBUG 1
+#define DEBUG 0
 #endif
 
 // Receives compression results from the server
