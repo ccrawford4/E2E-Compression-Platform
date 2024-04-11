@@ -52,9 +52,9 @@ void send_results(int sockfd) {
   }
 
   if (compression_flag) {
-       strcpy(buffer, "No Compression Detected!\n");
-  } else {
        strcpy(buffer, "Compression Detected!\n");
+  } else {
+       strcpy(buffer, "No Compression Detected!\n");
   }
 
   ssize_t packets = send(sockfd, buffer, strlen(buffer), 0);
