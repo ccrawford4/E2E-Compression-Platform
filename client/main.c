@@ -9,14 +9,9 @@
 
 // Receives congestion results from the server
 void receive_results(int sockfd) {
-  char *buffer = (char *)malloc(MAX_BUFFER_LEN);
-  if (buffer == NULL) {
-    perror("Error Allocating Memory");
-    exit(EXIT_FAILURE);
-  }
-  memset(buffer, 0, sizeof(buffer));
-  int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
-  if (bytes_rec > 0) {
+  char buffer;
+  ssize_t bytes_recv = recv(sockfd, &buffer, sizeof(buffer), 0);
+  if (bytes_recv > 0) {
     int flag = buffer;
     if (flag) {
         printf("Compression Detected!\n");
@@ -29,7 +24,6 @@ void receive_results(int sockfd) {
   printf("[client]: Received Results From Server!\n");
 #endif
 
-  free(buffer);
 }
 
 // Establishes a TCP connection
