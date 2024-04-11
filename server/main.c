@@ -45,16 +45,15 @@ void recv_config_file(int sockfd) {
 // Sends the results to the client
 void send_results(int sockfd) {
   char buffer = compression_flag ? 1 : 0;          // 1 for true and 0 for false
-  int n = strlen(buffer);
+  int n = sizeof(buffer);
+  ssize_t packets = send(sockfd, &buffer, sizeof(buffer), 0);
 
-  int packets = send_bytes(sockfd, buffer, n, 0);
   if (packets != n) {
     perror("ERROR! Not all the packets were received");
     close(sockfd);
     exit(EXIT_FAILURE);
   }
 
-  fclose(stream);
 }
 
 // Establishes a TCP Connection and based on the phase performs operations
@@ -138,7 +137,7 @@ void probing_phase(unsigned int port, unsigned int server_wait_time,
   double time_two = calc_stream_time(server_wait_time, cliaddr, sockfd);
 
   int compression_flag = calc_results(time_one, time_two) ? 1 : 0;
-  set_compression_flag(compression);
+  set_compression_flag(compression_flag);
 
 }
 
