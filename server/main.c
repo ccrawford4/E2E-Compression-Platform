@@ -9,6 +9,12 @@
 #define DEBUG 0
 #endif
 
+int compression_flag = 0;
+
+void set_compression_flag(int value) {
+    compression_flag = value;
+}
+
 // Calculate if Compression was detected
 bool calc_results(double time_one, double time_two) {
   double diff = abs(time_one - time_two);
@@ -16,36 +22,6 @@ bool calc_results(double time_one, double time_two) {
     return true;
   }
   return false;
-}
-
-// Save the results inot a file
-void save_results(double time_one, double time_two) {
-  char *buffer = (char *)malloc(MAX_BUFFER_LEN);
-  if (buffer == NULL) {
-    perror("Memory allocation failure");
-    exit(EXIT_FAILURE);
-  }
-
-  bool found_compression = calc_results(time_one, time_two);
-  int w;
-  if (found_compression) {
-    w = snprintf(buffer, MAX_BUFFER_LEN,
-                 "Compression Detected!\nTime One: %f\tTime Two: %f\n",
-                 time_one, time_two);
-  } else {
-    w = snprintf(buffer, MAX_BUFFER_LEN,
-                 "No Compression Detected!\nTime one: %f\tTime Two: %f\n",
-                 time_one, time_two);
-  }
-
-  if (w > MAX_BUFFER_LEN) {
-    perror("Buffer length exceeded!\n");
-    exit(EXIT_FAILURE);
-  }
-
-  size_t n = strlen(buffer);
-  write_contents_to_file(RESULT_FILE, buffer, n);
-  free(buffer);
 }
 
 // Receives and saves the JSON contents from Pre-Probing TCP Connection Phase
@@ -68,17 +44,7 @@ void recv_config_file(int sockfd) {
 
 // Sends the results to the client
 void send_results(int sockfd) {
-  char buffer[MAX_BUFFER_LEN];
-
-  // read the file contents into the buffer
-  FILE *stream = fopen(RESULT_FILE, "r");
-  if (stream == NULL) {
-    perror("Failed to open the file");
-    close(sockfd);
-    exit(EXIT_FAILURE);
-  }
-
-  int count = fread(&buffer, sizeof(char), MAX_BUFFER_LEN, stream);
+  char buffer = compression_flag ? 1 : 0;          // 1 for true and 0 for false
   int n = strlen(buffer);
 
   int packets = send_bytes(sockfd, buffer, n, 0);
@@ -102,7 +68,6 @@ void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
     send_results(client_socket);
   }
   
-  wait(5);
   close(tcp_socket);
   close(client_socket);
 }
@@ -172,7 +137,9 @@ void probing_phase(unsigned int port, unsigned int server_wait_time,
   wait(client_wait_time);
   double time_two = calc_stream_time(server_wait_time, cliaddr, sockfd);
 
-  save_results(time_one, time_two);
+  int compression_flag = calc_results(time_one, time_two) ? 1 : 0;
+  set_compression_flag(compression);
+
 }
 
 int main(int argc, char **argv) {

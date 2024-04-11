@@ -16,8 +16,14 @@ void receive_results(int sockfd) {
   }
   memset(buffer, 0, sizeof(buffer));
   int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
-  int len = strlen(buffer);
-  write_contents_to_file(RESULT_FILE, buffer, len);
+  if (bytes_rec > 0) {
+    int flag = buffer;
+    if (flag) {
+        printf("Compression Detected!\n");
+    } else {
+        printf("No Compression Detected!\n");
+    }
+  }
 
 #if DEBUG
   printf("[client]: Received Results From Server!\n");
@@ -44,7 +50,6 @@ void tcp_connection(char *full_path, unsigned int port,
 #endif
     receive_results(sockfd);
   }
-  wait(5);
   close(sockfd);
 }
 
