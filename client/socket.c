@@ -1,11 +1,3 @@
-#include <netdb.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <arpa/inet.h>
 #include "../shared/shared.h"
 
 #define RANDOM_FILE "../shared/random_file"

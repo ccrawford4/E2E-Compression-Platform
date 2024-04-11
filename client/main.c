@@ -1,5 +1,4 @@
 #include "main.h"
-#include <arpa/inet.h>
 
 #define MAX_BUFFER_LEN 500
 #define RESULT_FILE "result.txt"
@@ -17,9 +16,6 @@ void receive_results(int sockfd) {
     }
     memset(buffer, 0, sizeof(buffer));
     int bytes_recv = receive_bytes(sockfd, buffer, MAX_BUFFER_LEN, 0);
-    if (bytes_recv == -1) {
-        handle_error(sockfd, "Recv()");
-    }
     int len = strlen(buffer);
     write_contents_to_file(RESULT_FILE, buffer, len);
 
@@ -59,6 +55,7 @@ int dst_port, int src_port, int payload_size, int train_size) {
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(dst_port);
 
+    // Convert the server_ip to binary form
     if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
         handle_error(sockfd, "inet_pton()");
     }
@@ -94,8 +91,7 @@ int main(int argc, char**argv) {
 
     char* file_name = argv[1];
     size_t size = snprintf(NULL, 0, "%s%s", PATH_PREFIX, file_name) + 1;
-    char* full_path = malloc(size);
-
+    char* full_path = (char*)malloc(size);
     if (full_path == NULL) {
         perror("Failed to allocate memory");
         return EXIT_FAILURE;
@@ -107,32 +103,38 @@ int main(int argc, char**argv) {
         printf("ERROR! You must enter a server IP address in the %s file\n", argv[1]);
         return EXIT_FAILURE;
      }
-
+    
+     // Get necessary values from the JSON
      unsigned int tcp_preprob_port = (unsigned int)atoi(get_value(full_path, "TCP_PREPROB_port_number"));
-     handle_key_error(tcp_preprob_port, "TCP_PREPROB_port_number", full_path);
      unsigned int tcp_postprob_port = (unsigned int)atoi(get_value(full_path, "TCP_POSTPROB_port_number"));
-     handle_key_error(tcp_postprob_port, "TCP_POSTPROB_port_number", full_path); 
      unsigned int server_wait_time = (unsigned int)atoi(get_value(full_path, "server_wait_time"));
-     handle_key_error(server_wait_time, "server_wait_time", full_path);
      unsigned int measurement_time = (unsigned int)atoi(get_value(full_path, "measurement_time"));
-     handle_key_error(measurement_time, "measurement_time", full_path); 
      unsigned int dst_port = (unsigned int)atoi(get_value(full_path, "UDP_dest_port_number"));
-     handle_key_error(dst_port, "UDP_dest_port_number", full_path);
      unsigned int src_port = (unsigned int)atoi(get_value(full_path, "UDP_src_port_number"));
-     handle_key_error(src_port, "UDP_src_port_number", full_path);
      char* udp_payload_string = (char*)get_value(full_path, "UDP_payload_size");
      int len = strlen(udp_payload_string);
-     *(udp_payload_string + len - 1) = '\0';                                  // Remove the 'B' from the payload_size    
+     *(udp_payload_string + len - 1) = '\0';                               // Remove the 'B' from the payload_size    
      unsigned int payload_size = (unsigned int)atoi(udp_payload_string);
-     handle_key_error(payload_size, "UDP_payload_size", full_path);
      unsigned int train_size = (unsigned int)atoi(get_value(full_path, "UDP_packet_train_size"));
+
+     // Handle errors if the JSON is not properly initalized
+     handle_key_error(tcp_preprob_port, "TCP_PREPROB_port_number", full_path);
+     handle_key_error(tcp_postprob_port, "TCP_POSTPROB_port_number", full_path); 
+     handle_key_error(server_wait_time, "server_wait_time", full_path);
+     handle_key_error(measurement_time, "measurement_time", full_path); 
+     handle_key_error(dst_port, "UDP_dest_port_number", full_path);
+     handle_key_error(src_port, "UDP_src_port_number", full_path);
+     handle_key_error(payload_size, "UDP_payload_size", full_path);
      handle_key_error(train_size, "UDP_packet_train_size", full_path);
 
-     tcp_connection(full_path, tcp_preprob_port, server_ip, true);         // Pre-Probing Phase TCP Connection
+     // Pre-Probing Phase TCP Connection
+     tcp_connection(full_path, tcp_preprob_port, server_ip, true);
      
-     probing_phase(server_ip, server_wait_time, measurement_time, dst_port, src_port, payload_size, train_size);    // Probing Phase
+     // Probing Phase
+     probing_phase(server_ip, server_wait_time, measurement_time, dst_port, src_port, payload_size, train_size);
     
-     tcp_connection(full_path, tcp_postprob_port, server_ip, false);        // Post-Probing Phase TCP Connection
+     // Post-Probing Phase TCP Connection
+     tcp_connection(full_path, tcp_postprob_port, server_ip, false);
    
      free(full_path);
 

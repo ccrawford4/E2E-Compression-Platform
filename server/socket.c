@@ -63,23 +63,3 @@ ssize_t receive_udp_payload(int sockfd, struct sockaddr *src_addr, socklen_t add
     free(buffer);
     return bytes;
 }
-
-ssize_t send_udp_packets(int sockfd, struct sockaddr *dest_addr) {
-    const char* buf = "All UDP Packets Received!";
-    size_t len = strlen(buf);
-    ssize_t bytes_sent = sendto(sockfd, buf, len, 0, dest_addr, sizeof(struct sockaddr));
-    if (bytes_sent != len) {
-        handle_error(sockfd, "sendto()");
-    }
-    return sockfd;
-}
-
-// Exit functions
-void clean_exit() {exit(0);};
-
-void close_sockets(int sockfd, int client_socket) {
-    close(sockfd);
-    close(client_socket);
-    signal(SIGTERM, clean_exit);
-    signal(SIGINT, clean_exit);
-}
