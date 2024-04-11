@@ -7,16 +7,22 @@
 #define DEBUG 1
 #endif
 
-// Receives congestion results from the server
+// Receives compression results from the server
 void receive_results(int sockfd) {
   char* buffer = (char*)malloc(MAX_BUFFER_LEN);
-  ssize_t bytes_recv = recv(sockfd, &buffer, sizeof(buffer), 0);
+  if (buffer == NULL) {
+        perror("Memory allocation failure");
+        exit(EXIT_FAILURE);
+  }
+  ssize_t bytes_recv = recv(sockfd, buffer, MAX_BUFFER_LEN - 1, 0);
   if (bytes_recv > 0) {
+      buffer[bytes_recv] = '\0';
       printf("%s", buffer);
+  } else {
+     handle_error(sockfd, "recv()");
   }
 
 #if DEBUG
-  printf("Buffer: %s\n", buffer);
   printf("[client]: Received Results From Server!\n");
 #endif
 

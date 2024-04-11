@@ -52,19 +52,18 @@ void send_results(int sockfd) {
   }
 
   if (compression_flag) {
-       buffer = "No Compression Detected!";
+       strcpy(buffer, "No Compression Detected!\n");
   } else {
-       buffer = "Compression Detected";
-  }
-  int n = sizeof(buffer);
-  ssize_t packets = send(sockfd, buffer, sizeof(buffer), 0);
-
-  if (packets != n) {
-    perror("ERROR! Not all the packets were received");
-    close(sockfd);
-    exit(EXIT_FAILURE);
+       strcpy(buffer, "Compression Detected!\n");
   }
 
+  ssize_t packets = send(sockfd, buffer, strlen(buffer), 0);
+
+  if (packets < 0) {
+    handle_error(sockfd, "send()");
+  }
+
+  free(buffer);
 }
 
 // Establishes a TCP Connection and based on the phase performs operations
