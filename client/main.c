@@ -47,6 +47,7 @@ void tcp_connection(char *full_path, unsigned int port,
 #endif
     receive_results(sockfd);
   }
+  wait(5);
   close(sockfd);
 }
 
