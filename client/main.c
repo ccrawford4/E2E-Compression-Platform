@@ -19,41 +19,43 @@ void receive_results(int sockfd) {
     int len = strlen(buffer);
     write_contents_to_file(RESULT_FILE, buffer, len);
 
-    #if DEBUG
-      printf("[client]: Received Results From Server!\n");
-    #endif
+#if DEBUG
+  printf("[client]: Received Results From Server!\n");
+#endif
 
-    free(buffer);
+  free(buffer);
 }
 
 // Establishes a TCP connection
-void tcp_connection(char* full_path, unsigned int port, const char* server_address, bool pre_prob) {
-    #if DEBUG
-      printf("[client]: Establishing TCP Connection\n");
-    #endif 
-    int sockfd = establish_connection(server_address, port);
-    if (pre_prob) {
-        #if DEBUG
-          printf("[client]: Sending myconfig.json...\n");
-        #endif
-        send_file_contents(sockfd, full_path);
-    } else {
-        #if DEBUG
-        printf("[client]: Waiting for result file\n");
-        #endif
-        receive_results(sockfd);
-    }
-    close(sockfd);
- }
+void tcp_connection(char *full_path, unsigned int port,
+                    const char *server_address, bool pre_prob) {
+#if DEBUG
+  printf("[client]: Establishing TCP Connection\n");
+#endif
+  int sockfd = establish_connection(server_address, port);
+  if (pre_prob) {
+#if DEBUG
+    printf("[client]: Sending myconfig.json...\n");
+#endif
+    send_file_contents(sockfd, full_path);
+  } else {
+#if DEBUG
+    printf("[client]: Waiting for result file\n");
+#endif
+    receive_results(sockfd);
+  }
+  close(sockfd);
+}
 
 // Probing Phase
-void probing_phase(const char* server_ip, unsigned int server_wait_time, unsigned int measurement_time,
-int dst_port, int src_port, int payload_size, int train_size) {
-    int sockfd = init_socket(src_port, SOCK_DGRAM); // Creates a UDP socket
-    struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(dst_port);
+void probing_phase(const char *server_ip, unsigned int server_wait_time,
+                   unsigned int measurement_time, int dst_port, int src_port,
+                   int payload_size, int train_size) {
+  int sockfd = init_socket(src_port, SOCK_DGRAM); // Creates a UDP socket
+  struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_port = htons(dst_port);
 
     // Convert the server_ip to binary form
     if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
@@ -64,30 +66,36 @@ int dst_port, int src_port, int payload_size, int train_size) {
      printf("[client]: Sending first round of UDP packets...\n");
      #endif
 
-    // Send low entropy
-    send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, true);
-
-    // Wait
-    wait(server_wait_time);
-    wait(measurement_time);
-    
     #if DEBUG
+    printf("[client]: Sending first round of UDP packets...\n");
+   #endif
+
+  // Send low entropy
+  send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
+                   true);
+
+  // Wait
+  wait(server_wait_time);
+  wait(measurement_time);
+
+  #if DEBUG
     printf("[client]: Sending second round of UDP packets...\n");
-    #endif
+  #endif
 
-    // Send high entropy
-    send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size, false);
-    wait(measurement_time);
+  // Send high entropy
+  send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
+                   false);
+  wait(measurement_time);
 
-    close(sockfd);
+  close(sockfd);
 }
 
-int main(int argc, char**argv) {
-    if (argc != 2) {
-        printf("usage: \n");
-        printf("./compdetect_client <file_name.json>\n");
-        return EXIT_FAILURE;
-    }
+int main(int argc, char **argv) {
+  if (argc != 2) {
+    printf("usage: \n");
+    printf("./compdetect_client <file_name.json>\n");
+    return EXIT_FAILURE;
+  }
 
     char* file_name = argv[1];
     size_t size = snprintf(NULL, 0, "%s%s", PATH_PREFIX, file_name) + 1;
@@ -136,8 +144,7 @@ int main(int argc, char**argv) {
      // Post-Probing Phase TCP Connection
      tcp_connection(full_path, tcp_postprob_port, server_ip, false);
    
-     free(full_path);
+    free(full_path);
 
-    return EXIT_SUCCESS;
- 
+  return EXIT_SUCCESS;
 }
