@@ -101,7 +101,8 @@ void establish_tcp_connection(unsigned int server_port, bool pre_prob) {
   } else {
     send_results(client_socket);
   }
-
+  
+  wait(5);
   close(tcp_socket);
   close(client_socket);
 }
