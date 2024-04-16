@@ -68,16 +68,10 @@ void probing_phase(const char *server_ip, unsigned int server_wait_time,
 
 #if DEBUG
   printf("[client]: Sending first round of UDP packets...\n");
-#endif
-
-#if DEBUG
-  printf("[client]: Sending first round of UDP packets...\n");
-#endif
-
+#endif  
   // Send low entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
                    true);
-
   // Wait
   wait(server_wait_time);
   wait(measurement_time);
