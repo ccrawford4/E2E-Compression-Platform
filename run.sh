@@ -15,14 +15,12 @@ if [ "$mode" == "client" ]; then
     cd client || { echo "Error: Failed to change directory to client."; exit 1; }
     make || { echo "Error: Make failed."; exit 1; }
     ./compdetect_client "$arg" || { echo "Error: Failed to execute client."; exit 1; }
-    make clean || { echo "Error: Make clean failed."; exit 1; }
 
 elif [ "$mode" == "server" ]; then
     # Navigate to the server directory, build, execute, and clean up
     cd server || { echo "Error: Failed to change directory to server."; exit 1; }
     make || { echo "Error: Make failed."; exit 1; }
     ./compdetect_server "$arg" || { echo "Error: Failed to execute server."; exit 1; }
-    make clean || { echo "Error: Make clean failed."; exit 1; }
 
 else
     # Error if the first argument is neither "client" nor "server"
