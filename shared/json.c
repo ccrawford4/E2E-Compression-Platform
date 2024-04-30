@@ -49,7 +49,7 @@ const char* get_value(char* file_path, char* key) {
     const char* text = read_file(file_path); 
 
     // Create jansson json_t typedef objects
-    jsont_t *root;
+    json_t *root;
     json_error_t error;
 
     // Load the text into the json_t object
