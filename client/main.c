@@ -8,17 +8,17 @@
 
 // Receives compression results from the server
 void receive_results(int sockfd) {
-  char* buffer = (char*)malloc(MAX_BUFFER_LEN);
+  char *buffer = (char *)malloc(MAX_BUFFER_LEN);
   if (buffer == NULL) {
-        perror("Memory allocation failure");
-        exit(EXIT_FAILURE);
+    perror("Memory allocation failure");
+    exit(EXIT_FAILURE);
   }
   ssize_t bytes_recv = recv(sockfd, buffer, MAX_BUFFER_LEN - 1, 0);
   if (bytes_recv > 0) {
-      buffer[bytes_recv] = '\0';    
-      printf("%s", buffer);                       // Prints out the compression results from the server
+    buffer[bytes_recv] = '\0';
+    printf("%s", buffer); // Prints out the compression results from the server
   } else {
-     handle_error(sockfd, "recv()");
+    handle_error(sockfd, "recv()");
   }
 
   free(buffer);
@@ -29,9 +29,11 @@ void tcp_connection(char *full_path, unsigned int port,
                     const char *server_address, bool pre_prob) {
   int sockfd = establish_connection(server_address, port);
   if (pre_prob) {
-    send_file_contents(sockfd, full_path);       // Send the config file during pre-prob phase
+    send_file_contents(sockfd,
+                       full_path); // Send the config file during pre-prob phase
   } else {
-    receive_results(sockfd);                     // Receive the compression results during post-prob phase
+    receive_results(
+        sockfd); // Receive the compression results during post-prob phase
   }
   // TODO: Test to see if we can avoid this
   wait(5);
@@ -45,7 +47,7 @@ void probing_phase(const char *server_ip, unsigned int server_wait_time,
   int sockfd = init_socket(src_port, SOCK_DGRAM); // Creates a UDP socket
 
   // Destination IP address configuration
-  struct sockaddr_in server_addr;                
+  struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(dst_port);
@@ -58,8 +60,9 @@ void probing_phase(const char *server_ip, unsigned int server_wait_time,
   // Send low entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
                    true);
-  wait(server_wait_time);                       // Server timeout time to stop listening for UDP packet stream
-  wait(measurement_time);                       // Measurement time to prevent packet stream overlap
+  wait(server_wait_time); // Server timeout time to stop listening for UDP
+                          // packet stream
+  wait(measurement_time); // Measurement time to prevent packet stream overlap
 
   // Send high entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
