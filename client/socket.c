@@ -25,9 +25,10 @@ int init_socket(unsigned short port, int protocol) {
   addr.sin_port = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
 
-  // Bind the socket to the address
-  if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-    handle_error(sockfd, "bind()");
+  // If the protocol is UDP then bind the socket to an source address
+  if (protocol == SOCK_DGRAM) {
+    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+      handle_error(sockfd, "bind()");     
   }
 
   // Set the socket to non-blocking
