@@ -1,7 +1,6 @@
 #include "main.h"
 
 #define MAX_BUFFER_LEN 500
-#define RESULT_FILE "result.txt"
 
 #ifndef DEBUG
 #define DEBUG 0
@@ -16,15 +15,11 @@ void receive_results(int sockfd) {
   }
   ssize_t bytes_recv = recv(sockfd, buffer, MAX_BUFFER_LEN - 1, 0);
   if (bytes_recv > 0) {
-      buffer[bytes_recv] = '\0';
-      printf("%s", buffer);
+      buffer[bytes_recv] = '\0';    
+      printf("%s", buffer);                       // Prints out the compression results from the server
   } else {
      handle_error(sockfd, "recv()");
   }
-
-#if DEBUG
-  printf("[client]: Received Results From Server!\n");
-#endif
 
   free(buffer);
 }
@@ -32,21 +27,13 @@ void receive_results(int sockfd) {
 // Establishes a TCP connection
 void tcp_connection(char *full_path, unsigned int port,
                     const char *server_address, bool pre_prob) {
-#if DEBUG
-  printf("[client]: Establishing TCP Connection\n");
-#endif
   int sockfd = establish_connection(server_address, port);
   if (pre_prob) {
-#if DEBUG
-    printf("[client]: Sending myconfig.json...\n");
-#endif
-    send_file_contents(sockfd, full_path);
+    send_file_contents(sockfd, full_path);       // Send the config file during pre-prob phase
   } else {
-#if DEBUG
-    printf("[client]: Waiting for result file\n");
-#endif
-    receive_results(sockfd);
+    receive_results(sockfd);                     // Receive the compression results during post-prob phase
   }
+  // TODO: Test to see if we can avoid this
   wait(5);
   close(sockfd);
 }
@@ -56,39 +43,36 @@ void probing_phase(const char *server_ip, unsigned int server_wait_time,
                    unsigned int measurement_time, int dst_port, int src_port,
                    int payload_size, int train_size) {
   int sockfd = init_socket(src_port, SOCK_DGRAM); // Creates a UDP socket
-  struct sockaddr_in server_addr;
+
+  // Destination IP address configuration
+  struct sockaddr_in server_addr;                
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(dst_port);
 
-  // Convert the server_ip to binary form
+  // Convert the Server IP address to binary form
   if (inet_pton(AF_INET, server_ip, &server_addr.sin_addr) <= 0) {
     handle_error(sockfd, "inet_pton()");
   }
 
-#if DEBUG
-  printf("[client]: Sending first round of UDP packets...\n");
-#endif  
   // Send low entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
                    true);
-  // Wait
-  wait(server_wait_time);
-  wait(measurement_time);
-
-#if DEBUG
-  printf("[client]: Sending second round of UDP packets...\n");
-#endif
+  wait(server_wait_time);                       // Server timeout time to stop listening for UDP packet stream
+  wait(measurement_time);                       // Measurement time to prevent packet stream overlap
 
   // Send high entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
                    false);
+
+  // TODO: Check if this is necessary
   wait(measurement_time);
 
   close(sockfd);
 }
 
 int main(int argc, char **argv) {
+  // User should pass the config file as a command line argument
   if (argc != 2) {
     printf("usage: \n");
     printf("./compdetect_client <file_name.json>\n");
@@ -132,7 +116,7 @@ int main(int argc, char **argv) {
   unsigned int train_size =
       (unsigned int)atoi(get_value(full_path, "UDP_packet_train_size"));
 
-  // Handle errors if the JSON is not properly initalized
+  // Handle key/value errors if the JSON file is not formatted correctly
   handle_key_error(tcp_preprob_port, "TCP_PREPROB_port_number", full_path);
   handle_key_error(tcp_postprob_port, "TCP_POSTPROB_port_number", full_path);
   handle_key_error(server_wait_time, "server_wait_time", full_path);

@@ -10,6 +10,7 @@
 
 #define RANDOM_FILE "../shared/random_file"
 
+// Creates and binds a socket given a port number
 int init_socket(unsigned short port, int type) {
   int sockfd;
   struct sockaddr_in addr;
