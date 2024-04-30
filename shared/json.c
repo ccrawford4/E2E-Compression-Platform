@@ -2,11 +2,13 @@
 #define NUM_ITEMS 11
 #define ERROR "ERROR"
 
+// Data entry for each default JSON item
 typedef struct {
     char* key;
     const char* value;
 } item;
 
+// Object to keep track of default items
 item default_items[NUM_ITEMS] = {
     {"UDP_src_port_number", "9876"},
     {"UDP_dest_port_number", "8765"},
@@ -21,6 +23,7 @@ item default_items[NUM_ITEMS] = {
     {"server_wait_time", "5"}
 };
 
+// Handles key errors if the key parsed is not valid
 void handle_key_error(int ret_val, char* key, char* file_name) {
     if (key == 0) {
         printf("ERROR! Invalid Value For Said Key: %s\n", key);
@@ -29,7 +32,6 @@ void handle_key_error(int ret_val, char* key, char* file_name) {
     }
 }
 
-
 // Return the default value if the value doesn't in the JSON
 const char* get_default(char* key) {
     for (int i = 0; i < NUM_ITEMS; i++) {
@@ -37,17 +39,23 @@ const char* get_default(char* key) {
             return default_items->value;
         }
     }
+    // Returns an ERROR string if the key could not be found
     return ERROR;
 }
 
 // Gets the JSON's corresponding value given a key
 const char* get_value(char* file_path, char* key) {
-    json_t *root;
+    // Text points to the config file contents in memory
+    const char* text = read_file(file_path); 
+
+    // Create jansson json_t typedef objects
+    jsont_t *root;
     json_error_t error;
 
-    const char* text = read_file(file_path);
+    // Load the text into the json_t object
     root = json_loads(text, 0, &error);
 
+    // Account for parsing errors - as per jansson API reference
     if (!root) {
         fprintf(stderr, "error on line %d: %s\n", error.line, error.text);
         exit(EXIT_FAILURE);
@@ -58,10 +66,12 @@ const char* get_value(char* file_path, char* key) {
          exit(EXIT_FAILURE);
     }
 
+    // Get the value when given a key
     json_t *data = json_object_get(root, key);
     const char* value;
     
-    if (!json_is_string(data)) { // If key, value pair is empty then try to get the default first
+    // If the value does not exist in the config file then try to get the default value
+    if (!json_is_string(data)) { 
         value = get_default(key);
         if (!strcmp(value, ERROR)) {
             fprintf(stderr, "error parsing key %s\n", key);
@@ -70,6 +80,7 @@ const char* get_value(char* file_path, char* key) {
         return value;
     }
 
+    // Get the string version of the value
     value = json_string_value(data);
 
     return value;

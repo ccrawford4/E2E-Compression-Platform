@@ -1,7 +1,6 @@
 #include "shared.h"
-#define MAX_KEY_LEN 100
 
-
+// Prints out the current time in a human-readable format
 void print_time(struct timespec current_time) {
    struct tm *time_info;
    char buffer[80];
@@ -14,12 +13,14 @@ void print_time(struct timespec current_time) {
    printf("Current Time: %s.%09ld\n", buffer, current_time.tv_nsec);
 }
 
+// Handles errors and closes the sockfd to ensure safe program exits
 void handle_error(int sockfd, char* error_msg) {
     perror(error_msg);
     close(sockfd);
     exit(EXIT_FAILURE);
 }
 
+// Writes the contents of the buffer into a file
 void write_contents_to_file(char* file_name, char* buffer, int len) {
     FILE* fp = fopen(file_name, "w");
     if (fp == NULL) {
@@ -40,6 +41,7 @@ void wait(unsigned int seconds) {
     usleep(seconds * 1000000);
 }
 
+// Reads the contents of a file into a buffer and returns its pointer
 char* read_file(char* file_path) {
     FILE* file = fopen(file_path, "rb");
     if (file == NULL) {
