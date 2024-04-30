@@ -35,8 +35,10 @@ void tcp_connection(char *full_path, unsigned int port,
     receive_results(
         sockfd); // Receive the compression results during post-prob phase
   }
-  // TODO: Test to see if we can avoid this
+
+  // Wait to allow for all ACK, FIN, and SYN-ACK packets to be sent/received
   wait(5);
+
   close(sockfd);
 }
 
@@ -67,8 +69,8 @@ void probing_phase(const char *server_ip, unsigned int server_wait_time,
   // Send high entropy
   send_udp_packets(sockfd, server_addr, dst_port, payload_size, train_size,
                    false);
-
-  // TODO: Check if this is necessary
+  
+  // Wait again to allow for calculations on the server side
   wait(measurement_time);
 
   close(sockfd);
