@@ -1,5 +1,5 @@
 # E2E-Compression-Platform
-Source code for the server and client topology to test compression over a network
+Follow these steps to set up and run the applications for both the client and server in order to detect compression over a network
 ### Getting Started
 1. Clone the repository
 ```bash
@@ -62,3 +62,17 @@ $ ./run.sh server 7777
 $ ./run.sh client myconfig.json
 ```
 ### Result
+The client will receive the network compression results from the server and print them out like so:
+```bash
+No Compression Detected!
+```
+Note: If compression is detected over the network the client will print this out accordingly
+### Removing Object Files
+The source code includes a script that allows you to clean up all the object files and executables produced during the compilation of the program
+```bash
+# To clean up the client object files and executables:
+$ ./clean.sh client
+
+# To clean up the server object files and executables:
+$./clean.sh server
+```
