@@ -1,5 +1,21 @@
 # E2E-Compression-Platform
 Follow these steps to set up and run the applications for both the client and server in order to detect compression over a network
+## Overview
+### Objective
+The goal of this project is to create applications that can be used by a client and server machine to facilitate communication via TCP/UDP and enable the server to perform the calculations necessary to detect if compression has occured over the network.
+### How It Works
+The client sends a stream of UDP packets with low entropy data, waits a given amount of seconds, and then sends a stream of high entropy UDP packets. The server will receive the two streams, calculate how long it took to receive them, and then will use the difference between these stream times to determine if compression has been detected over the network.
+#### Steps
+1. Server will listen for incoming TCP packets
+2. Client will establish a TCP handshake and send the contents of the JSON config file
+3. Client will send a stream of low entropy UDP packets
+4. Server will receive the stream and calculate the total stream time
+5. The client will wait "measurement_time" seconds (as specificed in the config file)
+6. After the wait time is over steps 3 and 4 will repeat but this time with high entropy data
+7. The server will use the difference between the two stream times to determine if compression has been detected
+8. The client will establish another TCP handshake which the server will respond to with the results calculated in step 7
+9. The client will print out the results received from the server
+## Using The Program
 ### Getting Started
 1. Clone the repository
 ```bash
@@ -38,7 +54,7 @@ $ cd shared
 ```bash
 $ cd ..
 ```
-7. Start the server program using the run.sh script
+7. [From the server machine] start the server program using the run.sh script
 ```bash
 # Make sure that the port number is the same as the 
 # one specified in the myconfig.json file under "TCP_PREPROB_post_number"
@@ -49,7 +65,7 @@ $ cd ..
 # Example:
 $ ./run.sh server 7777
 ```
-8. To test it comprehensively you can navigate to a separate VM and run the client program using the run.sh script
+8. [From the client machine] run the client program using the run.sh script
 ```bash
 # Make sure to include the name of your JSON config file 
 # located in the 'shared' directory for the 
