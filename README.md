@@ -27,9 +27,11 @@ cd E2E-Compression-Platform
 ```
 3. Configure the JSON parser by running the configure script (yes sudo privlidges are required)
 ```bash
+# Note: the script may throw an error saying some packages are missing on the system but feel free to ignore these messages as they do
+# not indicate anything wrong with the script or the program.
+
 sudo ./configure.sh
 ```
-<p>Note: it may throw an error saying some packages are missing on the system but feel free to ignore those messages as they do not indicate anything wrong with the program.</p>
 4. Navigate to the shared directory
 ```bash
 cd shared
