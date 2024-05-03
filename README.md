@@ -29,7 +29,7 @@ cd E2E-Compression-Platform
 ```bash
 sudo ./configure.sh
 ```
-Note: it may throw an error saying some packages are missing on the system but feel free to ignore those messages as they do not indicate anything wrong with the program.
+<p>Note: it may throw an error saying some packages are missing on the system but feel free to ignore those messages as they do not indicate anything wrong with the program.</p>
 4. Navigate to the shared directory
 ```bash
 cd shared
