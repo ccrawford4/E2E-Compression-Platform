@@ -19,19 +19,19 @@ The client sends a stream of UDP packets with low entropy data, waits a given am
 ### Getting Started
 1. Clone the repository
 ```bash
-$ git clone git@github.com:ccrawford4/E2E-Compression-Platform.git
+git clone git@github.com:ccrawford4/E2E-Compression-Platform.git
 ```
 2. Navigate to the root directory
 ```bash
-$ cd E2E-Compression-Platform
+cd E2E-Compression-Platform
 ```
 3. Configure the JSON parser by running the configure script (yes sudo privlidges are required)
 ```bash
-$ sudo ./configure.sh
+sudo ./configure.sh
 ```
 4. Navigate to the shared directory
 ```bash
-$ cd shared
+cd shared
 ```
 5. Change the myconfig.json file to ensure that it has the correct server IP address and other desired values. Here is an example of how it should look like
 ```json
@@ -52,7 +52,7 @@ $ cd shared
 ```
 6. Go back to the root directory
 ```bash
-$ cd ..
+cd ..
 ```
 7. [From the server machine] start the server program using the run.sh script
 ```bash
@@ -63,7 +63,7 @@ $ cd ..
 # ./run.sh server <port_number>
 
 # Example:
-$ ./run.sh server 7777
+./run.sh server 7777
 ```
 8. [From the client machine] run the client program using the run.sh script
 ```bash
@@ -75,7 +75,7 @@ $ ./run.sh server 7777
 # ./run.sh client <config file name>.json
 
 # Example:
-$ ./run.sh client myconfig.json
+./run.sh client myconfig.json
 ```
 ### Result
 The client will receive the network compression results from the server and print them out like so:
@@ -87,8 +87,8 @@ Note: If compression is detected over the network the client will print this out
 The source code includes a script that allows you to clean up all the object files and executables produced during the compilation of the program
 ```bash
 # To clean up the client object files and executables:
-$ ./clean.sh client
+./clean.sh client
 
 # To clean up the server object files and executables:
-$./clean.sh server
+./clean.sh server
 ```
