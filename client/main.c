@@ -36,10 +36,12 @@ void tcp_connection(char *full_path, unsigned int port,
 
   // Wait to allow for all ACK, FIN, and SYN-ACK packets to be sent/received
   wait(5);
+  
+  // Print the results if we are in the Post-Probbing phase
+  if (!pre_prob)
+  	printf("%s", buffer);
 
-  printf("%s", buffer);
   free(buffer);
-
   close(sockfd);
 }
 
