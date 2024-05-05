@@ -57,7 +57,7 @@ cd shared
 ```bash
 cd ..
 ```
-7. [From the server machine] start the server program using the run.sh script
+7. [From the server machine] start the server program using the run.sh script ***Very important that you run the server machine FIRST or else the client will attempt to establish a connection to a port that isnt running and the program will throw an error***
 ```bash
 # Make sure that the port number is the same as the 
 # one specified in the myconfig.json file under "TCP_PREPROB_post_number"
